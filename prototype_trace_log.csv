@@ -1,9 +1,9 @@
-﻿step,req_id,thread_id,bank_id,row_hex,in_batch,thread_rank,pht_pred,t_close,qapi_saved,outcome,cmd_issued,latency_ns,reason
-1,1,0,0,0x1A,True,1,2,1,True,ROW_CLOSED,ACT + READ (Keep Open),28.0,QAPI Override: พบ Row 0x1A รอในคิว! (ยับยั้งการปิดแถว)
-2,2,0,0,0x1A,True,1,2,1,False,ROW_HIT,RDA (READ + Auto-Precharge),14.0,Handover RDA: ไม่มี Row 0x1A เหลือ + ปิดแถวล่วงหน้าให้เธรดถัดไป
-3,3,0,1,0x2B,True,1,1,1,False,ROW_CLOSED,ACT + RDA (Auto-Precharge),28.0,Adaptive RDA: ครบเกณฑ์ T_close=1 และไม่มีคำขอซ้ำในคิว
-4,4,1,0,0x3F,True,2,2,2,False,ROW_CLOSED,ACT + READ (Keep Open),28.0,Keep Open: พบ Row 0x3F รอในคิว Batch เดียวกัน
-5,5,1,0,0x3F,True,2,2,2,True,ROW_HIT,READ (Keep Open),14.0,QAPI Override: พบ Row 0x3F รอในคิว! (ยับยั้งการปิดแถว)
-6,6,1,0,0x3F,True,2,2,2,False,ROW_HIT,RDA (READ + Auto-Precharge),14.0,Adaptive RDA: ครบเกณฑ์ T_close=2 และไม่มีคำขอซ้ำในคิว
-7,7,2,0,0x7C,True,1,1,1,False,ROW_CLOSED,ACT + RDA (Auto-Precharge),28.0,Handover RDA: ไม่มี Row 0x7C เหลือ + ปิดแถวล่วงหน้าให้เธรดถัดไป
-8,8,3,0,0x9E,True,2,2,2,False,ROW_CLOSED,ACT + READ (Keep Open),28.0,Keep Open: A_curr=1 < T_close=2
+step,request,stage2_batch_rank,stage3_qapi,stage4_command,apparbs_outcome,apparbs_latency_ns,baseline_outcome,baseline_latency_ns,saved_ns
+1,"Core T0 -> Bank 0, Row 0x1A (Col 0)",Batch B=1 • Rank #3 (L_max=2),QAPI Override! (PHT Â=2 ครบเกณฑ์ แต่พบ Row 0x1A รอในคิวอีก 1 คำขอ -> ยับยั้งการปิดแถว!),ACT + READ (Keep Open),CLOSED,28.0,CLOSED,28.0,0.0
+2,"Core T0 -> Bank 0, Row 0x1A (Col 1)",Batch B=1 • Rank #3 (L_max=2),ไม่มี Row 0x1A เหลือในคิว + มีเธรดถัดไปรอใช้ Bank 0 -> สั่ง RDA ปิดแถวล่วงหน้า!,RDA (Auto-Precharge),HIT,14.0,HIT,14.0,0.0
+3,"Core T0 -> Bank 1, Row 0x2B (Col 0)",Batch B=1 • Rank #3 (L_max=2),ไม่มี Row 0x2B เหลือในคิว (ครบชุดคำขอ A_obs=1) -> สั่ง RDA ปิดแถวอัตโนมัติ,ACT + RDA (Auto-Precharge),CLOSED,28.0,CLOSED,28.0,0.0
+4,"Core T1 -> Bank 0, Row 0x3F (Col 4)",Batch B=1 • Rank #4 (L_max=3),PHT Â=2 • พบคำขอ Row 0x3F รอในคิวอีก 2 รายการ (Hold Open),ACT + READ (Keep Open),CLOSED,28.0,CONFLICT,42.0,14.0
+5,"Core T1 -> Bank 0, Row 0x3F (Col 5)",Batch B=1 • Rank #4 (L_max=3),QAPI Override! (PHT Â=2 ครบเกณฑ์ แต่พบ Row 0x3F รอในคิวอีก 1 คำขอ -> ยับยั้งการปิดแถว!),READ (Keep Open),HIT,14.0,HIT,14.0,0.0
+6,"Core T1 -> Bank 0, Row 0x3F (Col 6)",Batch B=1 • Rank #4 (L_max=3),ไม่มี Row 0x3F เหลือในคิว (ครบชุดคำขอ A_obs=3) -> สั่ง RDA ปิดแถวอัตโนมัติ,RDA (Auto-Precharge),HIT,14.0,HIT,14.0,0.0
+7,"Core T2 -> Bank 0, Row 0x7C (Col 0)",Batch B=1 • Rank #1 (L_max=1),ไม่มี Row 0x7C เหลือในคิว + มีเธรดถัดไปรอใช้ Bank 0 -> สั่ง RDA ปิดแถวล่วงหน้า!,ACT + RDA (Auto-Precharge),CLOSED,28.0,CONFLICT,42.0,14.0
+8,"Core T3 -> Bank 0, Row 0x9E (Col 0)",Batch B=1 • Rank #2 (L_max=1),ไม่มี Row 0x9E เหลือในคิว + มีเธรดถัดไปรอใช้ Bank 0 -> สั่ง RDA ปิดแถวล่วงหน้า!,ACT + RDA (Auto-Precharge),CLOSED,28.0,CONFLICT,42.0,14.0
