@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Presentation (26 Slides): การควบคุมหน่วยความจำ DRAM Row-Buffer ด้วย AP-PARBS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="vendor/katex/katex.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="mode-deck">
+
+  <!-- Top Presenter Control Bar -->
+  <header class="presenter-topbar">
+    <div class="topbar-brand">
+      <span class="brand-pill">RESEARCH DECK • 26 SLIDES</span>
+      <span class="brand-title">AP-PARBS: Adaptive Page-Mode &amp; Parallel DRAM Row-Buffer Management</span>
+    </div>
+
+    <div class="topbar-controls">
+      <button id="btn-prev" class="ctrl-btn" type="button" title="สไลด์ก่อนหน้า (ลูกศรซ้าย)">◀ ก่อนหน้า</button>
+      <span id="slide-counter" class="slide-counter-badge">01 / 26</span>
+      <button id="btn-next" class="ctrl-btn" type="button" title="สไลด์ถัดไป (ลูกศรขวา / Space)">ถัดไป ▶</button>
+
+      <select id="slide-jump" class="slide-select" aria-label="เลือกสไลด์">
+        <option value="0">01. หน้าปกงานวิจัย (Title &amp; Research Paradigm)</option>
+        <option value="1">02. บทคัดย่อและตัวชี้วัดหลัก (Executive Summary)</option>
+        <option value="2">03. ที่มาของปัญหา 1: ช่องว่างความเร็ว CPU vs RAM (Memory Wall)</option>
+        <option value="3">04. ที่มาของปัญหา 2: การปะปนของคำขอ (Request Interleaving)</option>
+        <option value="4">05. ที่มาของปัญหา 3: การสูญเสียความขนานระดับแบงก์ (BLP Loss)</option>
+        <option value="5">06. คำถามวิจัย วัตถุประสงค์ และสมมติฐาน (RQ &amp; Objectives)</option>
+        <option value="6">07. ทฤษฎีพื้นฐาน 1: โครงสร้างภายในของ DRAM และ Row Buffer</option>
+        <option value="7">08. ทฤษฎีพื้นฐาน 2: เปรียบเทียบเวลาแฝง 3 สถานะ (14ns / 28ns / 42ns)</option>
+        <option value="8">09. ทฤษฎีพื้นฐาน 3: นโยบาย Open-Page vs Closed-Page vs Timer</option>
+        <option value="9">10. ทฤษฎีพื้นฐาน 4: อัลกอริทึมจัดตาราง FCFS, FR-FCFS และ PAR-BS</option>
+        <option value="10">11. การทบทวนวรรณกรรมและงานวิจัยอ้างอิง (Literature Review)</option>
+        <option value="11">12. การวิเคราะห์ช่องว่างงานวิจัย (Research Gap Analysis)</option>
+        <option value="12">13. สถาปัตยกรรมระบบที่นำเสนอ: AP-PARBS Overview</option>
+        <option value="13">14. ส่วนที่ 1 (Adaptive): ตารางพยากรณ์จำนวนครั้งการเข้าถึง (PHT)</option>
+        <option value="14">15. ส่วนที่ 1 (ต่อ): การปรับเกณฑ์ตามความคับคั่ง &amp; กฎมองคิวล่วงหน้า (QAPI)</option>
+        <option value="15">16. ส่วนที่ 2 (Parallel): การจัดกลุ่มคำขอเป็น Batch (Batching)</option>
+        <option value="16">17. ส่วนที่ 2 (ต่อ): การจัดอันดับความขนานข้ามแบงก์ (BLP Ranking)</option>
+        <option value="17">18. สิ่งที่ปรับปรุง (Algorithm Refinement &amp; ซูโดโค้ด AP-PARBS)</option>
+        <option value="18">19. 🧪 Prototype Test 1: ทดสอบการทำงานทีละรอบสัญญาณนาฬิกา (Trace Test)</option>
+        <option value="19">20. 🧪 Prototype Test 2: ทดสอบ DRAM 8-Bank &amp; ชุดตรวจสอบความถูกต้อง</option>
+        <option value="20">21. ระเบียบวิธีวิจัยและการตั้งค่าการทดลอง (Experimental Setup)</option>
+        <option value="21">22. ผลการทดลองที่ 1: สัดส่วนสถานะ Row-Buffer &amp; เวลาแฝงเฉลี่ย</option>
+        <option value="22">23. ผลการทดลองที่ 2: ประสิทธิภาพรวม (Speedup) &amp; ความเป็นธรรม</option>
+        <option value="23">24. ผลการทดลองที่ 3: การประหยัดพลังงาน &amp; ต้นทุนฮาร์ดแวร์ 2.4 KB</option>
+        <option value="24">25. สรุปผลการวิจัยและแนวทางพัฒนาในอนาคต (Conclusion &amp; Future Work)</option>
+        <option value="25">26. เอกสารอ้างอิงที่ตรวจสอบได้ &amp; ดาวน์โหลดรายงานวิจัย PDF</option>
+      </select>
+
+      <button id="btn-overview" class="ctrl-btn" type="button" title="ดูภาพรวมทุกสไลด์ (กด G)">⊞ ภาพรวม (G)</button>
+      <button id="btn-notes" class="ctrl-btn" type="button" title="เปิด/ปิดบทพูดนำเสนออาจารย์ (กด N)">🎙️ บทพูด
+        (N)</button>
+      <button id="btn-mode" class="ctrl-btn" type="button" title="สลับโหมดสไลด์ / โหมดอ่านยาวทั้งหมด (กด M)">📜
+        อ่านยาว</button>
+      <button id="btn-theme" class="ctrl-btn" type="button" title="สลับธีมสว่าง/มืด (กด T)">🌙 ธีมมืด</button>
+      <a href="ap_parbs_simulator.py" target="_blank" class="ctrl-btn" title="เปิดดูโค้ดจำลองการทำงาน Python">🐍
+        โค้ดจำลอง</a>
+      <a href="รายงานวิจัย_AP-PARBS_DRAM_Row_Buffer.pdf" target="_blank" class="ctrl-btn ctrl-btn-pdf"
+        title="เปิดไฟล์รายงานวิจัยฉบับเต็ม (PDF)">📄 รายงานวิจัย (PDF)</a>
+    </div>
+  </header>
+
+  <!-- Progress Bar -->
+  <div class="deck-progress-track">
+    <div id="deck-progress" class="deck-progress-fill"></div>
+  </div>
+
+  <!-- Slide Overview Grid Modal -->
+  <div id="overview-modal" class="overview-modal" aria-hidden="true">
+    <div
+      style="max-width:1340px; margin:0 auto 22px; display:flex; justify-content:space-between; align-items:center; color:#f8fafc;">
+      <h3>สารบัญสไลด์ทั้งหมด (26 สไลด์ • กระจายเนื้อหาอ่านง่าย พร้อมแผนภาพและ Prototype Test)</h3>
+      <button id="btn-close-overview" class="ctrl-btn" type="button">✕ ปิดหน้าต่างนี้ (Esc)</button>
+    </div>
+    <div id="overview-grid" class="overview-grid"></div>
+  </div>
+
+  <!-- Main Presentation Stage -->
+  <main class="deck-stage" id="deck-stage">
+
+    <!-- ==========================================
+         SLIDE 01: TITLE SLIDE
+         ========================================== -->
+    <section class="slide active-slide" data-slide="1" data-title="หน้าปกงานวิจัย (Title & Research Paradigm)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">COMPUTER ARCHITECTURE &amp; MEMORY SYSTEMS RESEARCH • หัวข้อที่ 7</span>
+            <h2 class="slide-title">การนำเสนองานวิจัยและพัฒนาระบบการจัดการหน่วยความจำหลัก (RAM)</h2>
+          </div>
+          <span class="slide-number-pill">Slide 01 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="cover-hero">
+            <div class="cover-badges">
+              <span class="tag tag-adaptive">🔄 Adaptive Algorithm: Access-Based Page-Mode Prediction</span>
+              <span class="tag tag-parallel">⚡ Parallel Algorithm: Parallelism-Aware Batch Scheduling</span>
+              <span class="tag tag-refine">✨ Algorithm Refinement: Queue-Lookahead Auto-Precharge</span>
+            </div>
+
+            <h1 class="cover-main-title">
+              การควบคุมหน่วยความจำ DRAM Row-Buffer
+              ด้วยการผสานการพยากรณ์โหมดหน้าหน่วยความจำแบบปรับตัวได้เข้ากับการจัดตารางคำขอแบบขนาน
+            </h1>
+
+            <div class="cover-sub-title">
+              AP-PARBS: Adaptive Page-Mode Prediction Integrated with Parallelism-Aware Request Scheduling for Shared
+              DRAM Row-Buffer Management
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; gap:14px; margin-top:26px;">
+              <a href="รายงานวิจัย_AP-PARBS_DRAM_Row_Buffer.pdf" target="_blank" class="ctrl-btn ctrl-btn-pdf"
+                style="padding:12px 22px; font-size:0.98rem;">
+                📄 เปิดอ่านรายงานวิจัยฉบับเต็ม (Full Research Report PDF)
+                <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:18px;">
+                  <a href="รายงานวิจัย_AP-PARBS_DRAM_Row_Buffer.pdf" target="_blank" class="ctrl-btn ctrl-btn-pdf"
+                    style="padding:10px 18px; font-size:0.92rem;">
+                    📄 เปิดอ่านรายงานวิจัยฉบับเต็ม (PDF)
+                  </a>
+                  <a href="report.html" target="_blank" class="ctrl-btn"
+                    style="background:#1e293b; color:#fff; padding:12px 20px; font-size:0.95rem;">
+                    📖 เปิดฉบับหน้าเว็บรายงานวิชาการ (HTML Report)
+                    <a href="report.html" target="_blank" class="ctrl-btn"
+                      style="background:#1e293b; color:#fff; padding:10px 18px; font-size:0.92rem;">
+                      📖 เปิดหน้าเว็บรายงานวิชาการ (HTML)
+                    </a>
+                    <a href="ap_parbs_simulator.py" target="_blank" class="ctrl-btn"
+                      style="background:#0f766e; color:#fff; padding:10px 18px; font-size:0.92rem;">
+                      🐍 เปิดไฟล์โค้ดจำลอง Python (ap_parbs_simulator.py)
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="card card-adaptive">
+                <div class="card-title"><span class="step-badge" style="background:var(--accent-adaptive);">1</span>
+                  ฝั่ง Adaptive Algorithm</div>
+                <p>เรียนรู้จำนวนครั้งการเข้าถึงซ้ำของแต่ละแถวใน RAM
+                  เพื่อสั่งเปิดรอหรือสั่งปิดแถวอัตโนมัติตามสภาวะงานจริง</p>
+              </div>
+              <div class="card card-parallel">
+                <div class="card-title"><span class="step-badge" style="background:var(--accent-parallel);">2</span>
+                  ฝั่ง Parallel Algorithm</div>
+                <p>จัดกลุ่มคำขอเป็น Batch และจัดอันดับเธรดแบบขนานข้ามทุก DRAM Banks เพื่อรักษาความขนานระดับฮาร์ดแวร์</p>
+              </div>
+              <div class="card card-refine">
+                <div class="card-title"><span class="step-badge" style="background:var(--accent-refine);">3</span>
+                  สิ่งที่พัฒนาต่อยอด (Refinement)</div>
+                <p>เชื่อมสัญญาณตรวจสอบคิวล่วงหน้า (Queue-Lookahead) เข้ากับตัวพยากรณ์ เพื่อขจัดการสั่งปิดแถวผิดจังหวะ
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-footer">
+          <span>โครงสร้างการนำเสนอ 26 สไลด์ตามมาตรฐานงานวิจัย IEEE / ACM • กดปุ่มลูกศร ➔ เพื่อเริ่มนำเสนอ</span>
+          <span>Slide 01 / 26</span>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 02: EXECUTIVE SUMMARY & KPI HIGHLIGHTS
+         ========================================== -->
+    <section class="slide" data-slide="2" data-title="บทคัดย่อและตัวชี้วัดหลัก (Executive Summary)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">EXECUTIVE SUMMARY • ภาพรวมงานวิจัยใน 1 นาที</span>
+            <h2 class="slide-title">บทคัดย่อสำหรับผู้บริหารและผลสัมฤทธิ์หลักของงานวิจัย</h2>
+          </div>
+          <span class="slide-number-pill">Slide 02 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="card-elevated">
+            <div class="card-title">📌 สรุปแก่นของงานวิจัย (Core Research Summary)</div>
+            <ul class="clean-list">
+              <li><strong>ปัญหาหลัก:</strong> ในซีพียูแบบหลายแกนหลัก (Multi-core) คำขอใช้ RAM
+                จากหลายเธรดจะไหลมาปะปนกันจนทำให้เกิดการปะทะกันของแถวข้อมูลใน Row Buffer (<strong>Row-Buffer
+                  Conflict</strong> ซึ่งช้าถึง 42 ns) และทำลายความขนานระหว่างแบงก์</li>
+              <li><strong>วิธีการที่นำเสนอ:</strong> ออกแบบสถาปัตยกรรม <strong>AP-PARBS</strong>
+                ที่ผสานตัวพยากรณ์โหมดเปิด/ปิดแถวแบบปรับตัวได้ (Adaptive Predictor) เข้ากับตัวจัดตารางคำขอแบบกลุ่มขนาน
+                (Parallel Batch Scheduler) ให้ทำงานประสานกันแบบ Closed-Loop</li>
+              <li><strong>ผลลัพธ์ที่ได้:</strong> สามารถรักษาการเข้าถึงที่เร็วที่สุด (Row Hit 14 ns) ไว้ได้สูงสุด
+                พร้อมทั้งเปลี่ยนการปะทะที่ช้าที่สุด (Conflict 42 ns) ให้กลายเป็นสถานะปิดล่วงหน้า (Row Closed 28 ns)
+                ได้อย่างแม่นยำ</li>
+            </ul>
+          </div>
+
+          <div class="kpi-strip">
+            <div class="kpi-box">
+              <div class="kpi-value" style="color:var(--accent-success);">-24.8%</div>
+              <div class="kpi-label">ลดเวลาแฝงเฉลี่ยของ DRAM<br />(จาก 29.8 ns เหลือ 22.4 ns)</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-value" style="color:var(--accent-primary);">+19.4%</div>
+              <div class="kpi-label">เพิ่ม System Throughput<br />(Weighted Speedup)</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-value" style="color:var(--accent-adaptive);">-68.4%</div>
+              <div class="kpi-label">เปลี่ยน Row Conflict (42ns)<br />เป็น Row Closed (28ns)</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-value" style="color:var(--accent-refine);">2.4 KB</div>
+              <div class="kpi-label">ใช้พื้นที่ SRAM ใน Controller<br />น้อยมากต่อ 1 Channel</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>บทคัดย่อสังเคราะห์จากผลการจำลองระบบ 8-Core CMP ร่วมกับหน่วยความจำ DDR4-3200 มาตรฐาน JEDEC</span>
+        <span>Slide 02 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 03: PROBLEM ORIGIN 1 (THE MEMORY WALL)
+         ========================================== -->
+    <section class="slide" data-slide="3" data-title="ที่มาของปัญหา 1: ช่องว่างความเร็ว CPU vs RAM (Memory Wall)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 1: PROBLEM ORIGIN (PART 1/3)</span>
+            <h2 class="slide-title">ที่มาของปัญหา 1: ช่องว่างความเร็วระหว่าง CPU กับ RAM (The Memory Wall)</h2>
+          </div>
+          <span class="slide-number-pill">Slide 03 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-asymmetric">
+            <div class="card-elevated">
+              <div class="card-title">📈 ทำไมหน่วยความจำหลัก (DRAM) จึงเป็นคอขวดสำคัญที่สุด?</div>
+              <ul class="clean-list">
+                <li>ตลอด 20 ปีที่ผ่านมา จำนวนแกนประมวลผล (CPU Cores) และความเร็วในการคำนวณเติบโตขึ้นอย่างก้าวกระโดด</li>
+                <li>ในทางกลับกัน <strong>ความเร็วในการเข้าถึงข้อมูลชุดแรกของ DRAM (Access Latency)
+                    แทบไม่ลดลงเลย</strong> โดยยังคงอยู่ที่ประมาณ <strong>40–50 นาโนวินาที</strong></li>
+                <li>เมื่อซีพียูเพิ่มจาก 1 คอร์ เป็น 8–64 คอร์ ทุกคอร์ต่างแย่งกันส่งคำขอผ่านช่องทางหน่วยความจำ (Memory
+                  Channel) ที่ใช้ร่วมกัน</li>
+                <li>หากตัวควบคุมหน่วยความจำ (Memory Controller) จัดการลำดับคำขอได้ไม่ดี ซีพียูที่เร็วที่สุดก็ต้อง
+                  <strong>หยุดรอข้อมูลเฉยๆ (CPU Stall) กว่า 50–70% ของเวลาทั้งหมด</strong></li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">📊 แผนภาพเปรียบเทียบการเติบโตของ CPU Throughput vs. DRAM Latency</div>
+              <svg viewBox="0 0 460 280"
+                style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:12px;">
+                <!-- Axes -->
+                <line x1="55" y1="230" x2="430" y2="230" stroke="#475569" stroke-width="2" />
+                <line x1="55" y1="30" x2="55" y2="230" stroke="#475569" stroke-width="2" />
+                <text x="245" y="258" text-anchor="middle" font-size="12" font-weight="bold"
+                  fill="#334155">พัฒนาการตามเวลา (จำนวนคอร์ซีพียูเพิ่มขึ้น 1 → 4 → 8 → 16+ Cores)</text>
+                <text x="24" y="130" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155"
+                  transform="rotate(-90 24,130)">อัตราการเพิ่มประสิทธิภาพ (Log Scale)</text>
+
+                <!-- CPU Curve -->
+                <path d="M 65 215 Q 190 150, 410 42" fill="none" stroke="#2563eb" stroke-width="4" />
+                <circle cx="410" cy="42" r="5" fill="#2563eb" />
+                <text x="275" y="55" font-size="12" font-weight="bold" fill="#1d4ed8">ความต้องการข้อมูลของ Multi-Core
+                  CPU</text>
+
+                <!-- Shaded Memory Wall Gap -->
+                <path d="M 65 215 Q 190 150, 410 42 L 410 185 Q 220 195, 65 215 Z" fill="rgba(225, 29, 72, 0.12)" />
+                <text x="265" y="132" text-anchor="middle" font-size="13" font-weight="bold" fill="#be123c">⚠️
+                  ช่องว่างคอขวด (Memory Wall)</text>
+
+                <!-- DRAM Latency Curve -->
+                <path d="M 65 215 Q 220 198, 410 185" fill="none" stroke="#0d9488" stroke-width="4"
+                  stroke-dasharray="6,4" />
+                <circle cx="410" cy="185" r="5" fill="#0d9488" />
+                <text x="270" y="210" font-size="12" font-weight="bold" fill="#0f766e">ความเร็วการลด Latency ของ DRAM
+                  (~คงที่)</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>อ้างอิงแนวคิดพื้นฐาน: Wulf &amp; McKee, "Hitting the Memory Wall: Implications of the Obvious," ACM
+          SIGARCH 1995</span>
+        <span>Slide 03 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 04: PROBLEM ORIGIN 2 (REQUEST INTERLEAVING)
+         ========================================== -->
+    <section class="slide" data-slide="4" data-title="ที่มาของปัญหา 2: การปะปนของคำขอ (Request Interleaving)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 1: PROBLEM ORIGIN (PART 2/3)</span>
+            <h2 class="slide-title">ที่มาของปัญหา 2: การปะปนของคำขอ (Request Interleaving) ทำลาย Locality</h2>
+          </div>
+          <span class="slide-number-pill">Slide 04 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card card-danger">
+              <div class="card-title">🔄 ปรากฏการณ์ Request Stream Interleaving คืออะไร?</div>
+              <ul class="clean-list">
+                <li><strong>เมื่อทำงานคอร์เดียว (Single-Core):</strong>
+                  โปรแกรมมักอ่านข้อมูลที่เรียงต่อกันในแถวเดียวกันของ RAM เช่น <code>Row A → Row A → Row A</code>
+                  ทำให้ได้ข้อมูลจาก Row Buffer ทันที (Row Hit)</li>
+                <li><strong>เมื่อทำงานหลายคอร์พร้อมกัน (Multi-Core):</strong> แม้แต่ละคอร์จะอ่านแถวเดิมของตัวเอง
+                  แต่เมื่อคำขอไหลมารวมกันที่คิวของ Memory Controller ลำดับคำขอจะสลับกันเป็น
+                  <code>Row A → Row B → Row C → Row D</code></li>
+                <li><strong>ผลเสียร้ายแรง:</strong> ทุกครั้งที่สลับแถว
+                  ฮาร์ดแวร์ต้องสั่งปิดแถวเก่าแล้วเปิดแถวใหม่ซ้ำไปมาไม่สิ้นสุด เรียกว่า <strong>Row-Buffer
+                    Thrashing</strong></li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">🎨 แผนภาพเปรียบเทียบ: ลำดับคำขอก่อนและหลังผ่านการรวมคิว</div>
+              <svg viewBox="0 0 480 275"
+                style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:10px;">
+                <!-- Individual Cores -->
+                <text x="80" y="24" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#334155">ลำดับในแต่ละ
+                  Core (มี Locality ดี)</text>
+                <rect x="16" y="36" width="130" height="36" rx="6" fill="#dbeafe" stroke="#2563eb" />
+                <text x="81" y="59" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e3a8a">Core 0: A1,
+                  A2, A3</text>
+
+                <rect x="16" y="84" width="130" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" />
+                <text x="81" y="107" text-anchor="middle" font-size="11" font-weight="bold" fill="#14532d">Core 1: B1,
+                  B2, B3</text>
+
+                <rect x="16" y="132" width="130" height="36" rx="6" fill="#fef3c7" stroke="#d97706" />
+                <text x="81" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#78350f">Core 2: C1,
+                  C2, C3</text>
+
+                <rect x="16" y="180" width="130" height="36" rx="6" fill="#ffe4e6" stroke="#e11d48" />
+                <text x="81" y="203" text-anchor="middle" font-size="11" font-weight="bold" fill="#881337">Core 3: D1,
+                  D2, D3</text>
+
+                <!-- Converging Arrows -->
+                <path d="M 148 54 L 200 115" stroke="#64748b" stroke-width="2" />
+                <path d="M 148 102 L 200 122" stroke="#64748b" stroke-width="2" />
+                <path d="M 148 150 L 200 130" stroke="#64748b" stroke-width="2" />
+                <path d="M 148 198 L 200 138" stroke="#64748b" stroke-width="2" />
+
+                <!-- Interleaved Stream -->
+                <rect x="202" y="65" width="260" height="125" rx="10" fill="#0f172a" stroke="#475569" />
+                <text x="332" y="90" text-anchor="middle" font-size="12" font-weight="bold"
+                  fill="#f8fafc">คิวรวมที่เข้าสู่ DRAM Bank เดียวกัน</text>
+
+                <rect x="216" y="105" width="48" height="32" rx="5" fill="#3b82f6" /><text x="240" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Row A</text>
+                <rect x="272" y="105" width="48" height="32" rx="5" fill="#22c55e" /><text x="296" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Row B</text>
+                <rect x="328" y="105" width="48" height="32" rx="5" fill="#f59e0b" /><text x="352" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Row C</text>
+                <rect x="384" y="105" width="48" height="32" rx="5" fill="#f43f5e" /><text x="408" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Row D</text>
+
+                <text x="332" y="165" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#fda4af">⚡
+                  เปลี่ยนแถวทุกคำขอ = เกิด Conflict Miss 100%!</text>
+
+                <rect x="16" y="230" width="446" height="34" rx="8" fill="#ffe4e6" stroke="#e11d48" />
+                <text x="239" y="252" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#9f1239">
+                  สรุป: ยิ่งจำนวนคอร์มาก ความใกล้เคียงเชิงพื้นที่ (Spatial Locality) ที่หน้า DRAM ยิ่งถูกทำลาย
+                </text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>อ้างอิงการค้นพบของ Awasthi et al., "Prediction-Based DRAM Row-Buffer Management in the Many-Core Era,"
+          PACT 2011</span>
+        <span>Slide 04 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 05: PROBLEM ORIGIN 3 (BLP DESTRUCTION)
+         ========================================== -->
+    <section class="slide" data-slide="5" data-title="ที่มาของปัญหา 3: การสูญเสียความขนานระดับแบงก์ (BLP Loss)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 1: PROBLEM ORIGIN (PART 3/3)</span>
+            <h2 class="slide-title">ที่มาของปัญหา 3: การถูกทำลายของความขนานระดับแบงก์ (Bank-Level Parallelism)</h2>
+          </div>
+          <span class="slide-number-pill">Slide 05 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card card-parallel">
+              <div class="card-title">⚡ ความขนานระดับแบงก์ (BLP) ช่วยซ่อนเวลาแฝงของ RAM อย่างไร?</div>
+              <ul class="clean-list">
+                <li>หน่วยความจำ DRAM 1 แถว (Rank) ถูกแบ่งออกเป็น <strong>8 ถึง 16 แบงก์อิสระ (Independent
+                    Banks)</strong> ที่สามารถทำงานขนานกันได้พร้อมๆ กัน</li>
+                <li>หาก <strong>Thread A</strong> ต้องการข้อมูล 2 ชิ้นที่อยู่ใน <strong>Bank 0</strong> และ <strong>Bank
+                    1</strong> ซีพียูจะส่งคำขอทั้ง 2 ออกไปพร้อมกัน ताकिซ้อนทับเวลาทำงานกัน (ใช้เวลาหยุดรอเพียง 1 รอบของ
+                  DRAM)</li>
+                <li><strong>แต่เมื่อมี Thread B เข้ามาแทรกเฉพาะที่ Bank 1:</strong> คำขอชิ้นที่ 2 ของ Thread A
+                  จะถูกเลื่อนออกไป ทำให้ Thread A ต้องหยุดรอเป็น <strong>2 เท่าของเวลาปกติ (Serialization
+                    Stall)!</strong></li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">⏱️ แผนภาพเปรียบเทียบเวลาที่ซีพียูต้องหยุดรอ (CPU Stall Time)</div>
+              <svg viewBox="0 0 480 275"
+                style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:10px;">
+                <!-- Case 1: Ideal Parallel Execution -->
+                <text x="20" y="26" font-size="12" font-weight="bold" fill="#15803d">กรณีที่ 1: รักษา Bank-Level
+                  Parallelism (ทำงานขนานกันทั้ง 2 แบงก์)</text>
+                <text x="20" y="54" font-size="11" font-weight="bold" fill="#334155">Bank 0:</text>
+                <rect x="75" y="38" width="145" height="26" rx="5" fill="#3b82f6" />
+                <text x="147" y="55" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Thread A (Req
+                  1)</text>
+
+                <text x="20" y="88" font-size="11" font-weight="bold" fill="#334155">Bank 1:</text>
+                <rect x="75" y="72" width="145" height="26" rx="5" fill="#3b82f6" />
+                <text x="147" y="89" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Thread A (Req
+                  2)</text>
+
+                <line x1="220" y1="34" x2="220" y2="108" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="4,3" />
+                <text x="232" y="72" font-size="11.5" font-weight="bold" fill="#15803d">✓ Thread A เสร็จพร้อมกันใน 1
+                  ช่วงเวลา!</text>
+
+                <!-- Divider -->
+                <line x1="16" y1="126" x2="464" y2="126" stroke="#cbd5e1" stroke-width="1.5" />
+
+                <!-- Case 2: Destroyed BLP -->
+                <text x="20" y="152" font-size="12" font-weight="bold" fill="#be123c">กรณีที่ 2: BLP
+                  ถูกทำลายเพราะจัดลำดับคำขอแต่ละ Bank แยกกัน</text>
+                <text x="20" y="180" font-size="11" font-weight="bold" fill="#334155">Bank 0:</text>
+                <rect x="75" y="164" width="145" height="26" rx="5" fill="#3b82f6" />
+                <text x="147" y="181" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Thread A (Req
+                  1)</text>
+                <rect x="224" y="164" width="145" height="26" rx="5" fill="#f59e0b" />
+                <text x="296" y="181" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Thread B (Req
+                  1)</text>
+
+                <text x="20" y="216" font-size="11" font-weight="bold" fill="#334155">Bank 1:</text>
+                <rect x="75" y="200" width="145" height="26" rx="5" fill="#f59e0b" />
+                <text x="147" y="217" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Thread B (Req 2
+                  แทรก!)</text>
+                <rect x="224" y="200" width="145" height="26" rx="5" fill="#3b82f6" />
+                <text x="296" y="217" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">Thread A (Req 2
+                  ล่าช้า)</text>
+
+                <line x1="369" y1="158" x2="369" y2="236" stroke="#e11d48" stroke-width="2.5" stroke-dasharray="4,3" />
+                <text x="240" y="258" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#be123c">✗ ทั้ง
+                  Thread A และ B ต้องรอถึง 2 ช่วงเวลา (ช้าลง 2 เท่าทั้งคู่!)</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>อ้างอิงทฤษฎีความขนานระดับแบงก์: Mutlu &amp; Moscibroda, "Parallelism-Aware Batch Scheduling," ISCA
+          2008</span>
+        <span>Slide 05 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 06: RESEARCH QUESTIONS & OBJECTIVES
+         ========================================== -->
+    <section class="slide" data-slide="6" data-title="คำถามวิจัย วัตถุประสงค์ และสมมติฐาน (RQ & Objectives)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 2: RESEARCH QUESTIONS &amp; OBJECTIVES</span>
+            <h2 class="slide-title">คำถามวิจัย วัตถุประสงค์ และสมมติฐานของการศึกษา</h2>
+          </div>
+          <span class="slide-number-pill">Slide 06 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-3">
+            <div class="card card-danger">
+              <div class="card-title"><span class="step-badge" style="background:var(--accent-danger);">RQ1</span>
+                ข้อจำกัดของระบบเดิม</div>
+              <p>เพราะเหตุใดนโยบายควบคุม Row Buffer แบบคงที่ (Open/Closed-Page) และแบบตั้งเวลา (Timer)
+                จึงล้มเหลวเมื่อจำนวนคอร์เพิ่มขึ้น?</p>
+            </div>
+
+            <div class="card card-adaptive">
+              <div class="card-title"><span class="step-badge" style="background:var(--accent-adaptive);">RQ2</span>
+                การพยากรณ์แบบปรับตัวได้</div>
+              <p>จะออกแบบตัวพยากรณ์โหมดหน้าหน่วยความจำที่เรียนรู้จากจำนวนครั้งการเข้าถึงจริงร่วมกับสถานะคิว
+                โดยใช้ฮาร์ดแวร์ต่ำได้อย่างไร?</p>
+            </div>
+
+            <div class="card card-parallel">
+              <div class="card-title"><span class="step-badge" style="background:var(--accent-parallel);">RQ3</span>
+                การผสานความขนาน</div>
+              <p>การผสาน Adaptive Predictor เข้ากับ Parallel Batch Scheduler จะช่วยลด Conflict Miss และเพิ่ม BLP
+                พร้อมกันได้อย่างไร?</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card-elevated">
+              <div class="card-title">🎯 วัตถุประสงค์ของงานวิจัย (Research Objectives)</div>
+              <ul class="clean-list">
+                <li>เพื่อออกแบบสถาปัตยกรรม <strong>AP-PARBS</strong> ที่ผสาน <em>Adaptive Page-Mode Prediction</em>
+                  เข้ากับ <em>Parallel Request Scheduling</em></li>
+                <li>เพื่อพัฒนาเทคนิค <strong>Queue-Lookahead Precharge Inhibition (QAPI)</strong>
+                  ป้องกันการสั่งปิดแถวผิดจังหวะเมื่อยังมีคำขอแถวเดียวกันรอในคิว</li>
+                <li>เพื่อลดเวลาแฝงเฉลี่ยของ DRAM และเพิ่มทั้ง Throughput กับความเป็นธรรม (Fairness) ในระบบ Multi-core
+                </li>
+              </ul>
+            </div>
+
+            <div class="card card-refine">
+              <div class="card-title">💡 สมมติฐานการวิจัย (Research Hypothesis)</div>
+              <p>
+                <em>"เมื่อตัวควบคุมหน่วยความจำจัดกลุ่มคำขอของเธรดเดียวกันให้ทำงานขนานกันข้ามแบงก์ (Parallel Scheduling)
+                  และใช้ตัวพยากรณ์ที่ตรวจสอบคิวล่วงหน้าเพื่อแนบคำสั่งปิดแถวอัตโนมัติ (Auto-Precharge)
+                  ไปกับคำขอสุดท้ายของเธรดนั้น จะสามารถเปลี่ยน Row Conflict (42 ns) ให้กลายเป็น Row Closed (28 ns)
+                  ได้โดยไม่สูญเสียโอกาสการเกิด Row Hit (14 ns)"</em>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>กรอบการวิจัยตามระเบียบวิธีทางวิศวกรรมคอมพิวเตอร์: กำหนดคำถามวิจัย → ตั้งสมมติฐาน → พัฒนาต้นแบบ →
+          ทดสอบเปรียบเทียบ</span>
+        <span>Slide 06 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 07: THEORETICAL BACKGROUND 1 (DRAM STRUCTURE)
+         ========================================== -->
+    <section class="slide" data-slide="7" data-title="ทฤษฎีพื้นฐาน 1: โครงสร้างภายในของ DRAM และ Row Buffer">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 3: THEORETICAL BACKGROUND (PART 1/4)</span>
+            <h2 class="slide-title">ทฤษฎีพื้นฐาน 1: โครงสร้างภายในของ DRAM Bank และหน้าที่ของ Row Buffer</h2>
+          </div>
+          <span class="slide-number-pill">Slide 07 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-asymmetric-rev">
+            <div class="card-elevated">
+              <div class="card-title">🏗️ แผนผังการทำงานภายใน 1 DRAM Bank</div>
+              <svg viewBox="0 0 430 290"
+                style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:8px;">
+                <rect x="35" y="16" width="360" height="122" rx="8" fill="#e2e8f0" stroke="#475569"
+                  stroke-width="1.5" />
+                <text x="215" y="38" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">DRAM 2D
+                  Capacitor Array (เช่น 65,536 แถว × 8 KB)</text>
+                <rect x="52" y="48" width="326" height="22" rx="4" fill="#cbd5e1" /><text x="215" y="63"
+                  text-anchor="middle" font-size="10.5" fill="#334155">Row 0 (ปิดอยู่)</text>
+                <rect x="52" y="76" width="326" height="24" rx="4" fill="#bbf7d0" stroke="#16a34a" stroke-width="1.5" />
+                <text x="215" y="92" text-anchor="middle" font-size="11" font-weight="bold" fill="#14532d">Row k
+                  (แถวที่กำลังถูกดึงลงมาที่ Row Buffer)</text>
+                <rect x="52" y="106" width="326" height="22" rx="4" fill="#cbd5e1" /><text x="215" y="121"
+                  text-anchor="middle" font-size="10.5" fill="#334155">Row N-1 (ปิดอยู่)</text>
+
+                <path d="M145 140 L145 176" stroke="#16a34a" stroke-width="3" />
+                <text x="72" y="162" font-size="10.5" font-weight="bold" fill="#15803d">1. ACTIVATE (tRCD)</text>
+                <path d="M285 176 L285 140" stroke="#e11d48" stroke-width="3" />
+                <text x="294" y="162" font-size="10.5" font-weight="bold" fill="#be123c">3. PRECHARGE (tRP)</text>
+
+                <rect x="35" y="178" width="360" height="48" rx="8" fill="#fef08a" stroke="#ca8a04" stroke-width="2" />
+                <text x="215" y="200" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#713f12">ROW BUFFER
+                  (Sense Amplifiers ขนาด 8 KB)</text>
+                <text x="215" y="218" text-anchor="middle" font-size="10.5"
+                  fill="#854d0e">ทำหน้าที่เป็นแคชระดับฮาร์ดแวร์ที่ถือข้อมูลได้เพียง 1 แถวต่อ Bank</text>
+
+                <path d="M215 226 L215 252" stroke="#2563eb" stroke-width="3" />
+                <text x="225" y="244" font-size="10.5" font-weight="bold" fill="#1d4ed8">2. READ / WRITE (tCL)</text>
+                <rect x="90" y="254" width="250" height="28" rx="6" fill="#dbeafe" stroke="#2563eb"
+                  stroke-width="1.5" />
+                <text x="215" y="272" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e3a8a">ส่งข้อมูล 64
+                  Bytes ออกสู่ Data Bus → CPU</text>
+              </svg>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">🔑 หลักการทำงานสำคัญที่ต้องรู้เกี่ยวกับ DRAM</div>
+              <ul class="clean-list">
+                <li><strong>การอ่านข้อมูลจากตัวเก็บประจุ (Capacitor Cell) ไม่สามารถดึงโดยตรงได้:</strong>
+                  ทุกครั้งที่ต้องการอ่านแม้เพียง 64 ไบต์ DRAM ต้องดึงข้อมูลทั้งแถว (ขนาด 8 KB) ลงมาพักไว้ที่ <strong>Row
+                    Buffer (Sense Amplifiers)</strong> ก่อนเสมอ</li>
+                <li><strong>คำสั่งพื้นฐาน 3 คำสั่งของ DRAM:</strong>
+                  <br />1️⃣ <code>ACTIVATE (ACT)</code>: เปิดแถวและโหลดข้อมูลลงสู่ Row Buffer ใช้เวลา $t_{RCD}$
+                  <br />2️⃣ <code>READ / WRITE (RD/WR)</code>: เลือกคอลัมน์จาก Row Buffer ส่งเข้าบัส ใช้เวลา $t_{CL}$
+                  <br />3️⃣ <code>PRECHARGE (PRE)</code>: เขียนข้อมูลกลับและล้าง Row Buffer เพื่อเตรียมเปิดแถวอื่น
+                  ใช้เวลา $t_{RP}$
+                </li>
+                <li><strong>ข้อจำกัดทางกายภาพ:</strong> ใน 1 แบงก์ มี Row Buffer เพียงชุดเดียว จึงเปิดค้างไว้ได้แค่
+                  <strong>ครั้งละ 1 แถวเท่านั้น</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>โครงสร้างมาตรฐานของ Synchronous Dynamic Random-Access Memory (JEDEC DDR4 / DDR5 Standard)</span>
+        <span>Slide 07 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 08: THEORETICAL BACKGROUND 2 (3 TIMING STATES)
+         ========================================== -->
+    <section class="slide" data-slide="8" data-title="ทฤษฎีพื้นฐาน 2: เปรียบเทียบเวลาแฝง 3 สถานะ (14ns / 28ns / 42ns)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 3: THEORETICAL BACKGROUND (PART 2/4)</span>
+            <h2 class="slide-title">ทฤษฎีพื้นฐาน 2: เปรียบเทียบเวลาแฝง 3 สถานะของการเข้าถึง Row Buffer</h2>
+          </div>
+          <span class="slide-number-pill">Slide 08 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="card-elevated">
+            <div class="card-title">⏱️ แผนภาพแกนเวลา (Nanosecond Timeline Comparison) ของการเข้าถึง 3 รูปแบบ</div>
+            <svg viewBox="0 0 920 215"
+              style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:14px;">
+              <!-- Time Axis Header -->
+              <line x1="230" y1="28" x2="860" y2="28" stroke="#64748b" stroke-width="1.5" />
+              <text x="230" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">0 ns</text>
+              <text x="410" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">14 ns</text>
+              <text x="590" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">28 ns</text>
+              <text x="770" y="18" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">42 ns</text>
+
+              <!-- 1. Row Hit -->
+              <text x="20" y="72" font-size="13" font-weight="bold" fill="#15803d">1. Row-Buffer Hit</text>
+              <text x="20" y="90" font-size="11" fill="#475569">(แถวที่ต้องการเปิดรออยู่แล้ว)</text>
+              <rect x="230" y="52" width="180" height="38" rx="6" fill="#10b981" />
+              <text x="320" y="76" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">READ Column
+                (tCL = 14 ns)</text>
+              <text x="425" y="76" font-size="13" font-weight="bold" fill="#15803d">รวม 14 ns (เร็วที่สุด 1×)</text>
+
+              <!-- 2. Row Closed -->
+              <text x="20" y="132" font-size="13" font-weight="bold" fill="#1d4ed8">2. Row-Buffer Closed</text>
+              <text x="20" y="150" font-size="11" fill="#475569">(ปิดแถวเก่าไว้ล่วงหน้าแล้ว)</text>
+              <rect x="230" y="112" width="180" height="38" rx="6" fill="#3b82f6" />
+              <text x="320" y="136" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">ACTIVATE (tRCD
+                = 14 ns)</text>
+              <rect x="412" y="112" width="178" height="38" rx="6" fill="#10b981" />
+              <text x="501" y="136" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">READ Column
+                (tCL = 14 ns)</text>
+              <text x="605" y="136" font-size="13" font-weight="bold" fill="#1d4ed8">รวม 28 ns (ปานกลาง 2×)</text>
+
+              <!-- 3. Row Conflict -->
+              <text x="20" y="190" font-size="13" font-weight="bold" fill="#be123c">3. Row-Buffer Conflict</text>
+              <text x="20" y="208" font-size="11" fill="#475569">(มีแถวอื่นเปิดค้างขวางอยู่!)</text>
+              <rect x="230" y="170" width="180" height="38" rx="6" fill="#f43f5e" />
+              <text x="320" y="194" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">PRECHARGE (tRP
+                = 14 ns)</text>
+              <rect x="412" y="170" width="178" height="38" rx="6" fill="#3b82f6" />
+              <text x="501" y="194" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">ACTIVATE (tRCD
+                = 14 ns)</text>
+              <rect x="592" y="170" width="178" height="38" rx="6" fill="#10b981" />
+              <text x="681" y="194" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">READ Column
+                (tCL = 14 ns)</text>
+              <text x="782" y="194" font-size="13" font-weight="bold" fill="#be123c">รวม 42 ns (ช้า 3×!)</text>
+            </svg>
+          </div>
+
+          <div class="grid-3">
+            <div class="card card-success">
+              <div class="card-title">🟢 Row Hit: $t_{CL} = 14\text{ ns}$</div>
+              <p>เป้าหมายสูงสุดเมื่อคำขอถัดไปเรียกแถวเดิมซ้ำ จึงควร <strong>เปิดแถวค้างไว้ (Keep Open)</strong>
+                เฉพาะเมื่อมั่นใจว่าจะมีคำขอซ้ำตามมา</p>
+            </div>
+            <div class="card card-parallel">
+              <div class="card-title">🔵 Row Closed: $t_{RCD}+t_{CL} = 28\text{ ns}$</div>
+              <p>หากรู้ล่วงหน้าว่าคำขอถัดไปจะเปลี่ยนแถว การสั่ง <strong>ปิดแถวล่วงหน้า (Auto-Precharge)</strong>
+                จะช่วยตัดเวลา $t_{RP}$ ออกไปได้ทันที 14 ns!</p>
+            </div>
+            <div class="card card-danger">
+              <div class="card-title">🔴 Row Conflict: $t_{RP}+t_{RCD}+t_{CL} = 42\text{ ns}$</div>
+              <p>เกิดจากการเปิดแถวค้างไว้โดยไม่มีใครใช้ซ้ำ ทำให้คำขอถัดไปต้องมารอ Precharge เอง เสียเวลาแฝงสูงสุดถึง 3
+                เท่า</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>หัวใจของการควบคุม Row Buffer คือ: รักษาสีเขียว (14 ns) ให้มากที่สุด และเปลี่ยนสีแดง (42 ns)
+          ให้เป็นสีน้ำเงิน (28 ns)</span>
+        <span>Slide 08 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 09: THEORETICAL BACKGROUND 3 (PAGE POLICIES)
+         ========================================== -->
+    <section class="slide" data-slide="9" data-title="ทฤษฎีพื้นฐาน 3: นโยบาย Open-Page vs Closed-Page vs Timer">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 3: THEORETICAL BACKGROUND (PART 3/4)</span>
+            <h2 class="slide-title">ทฤษฎีพื้นฐาน 3: เปรียบเทียบข้อดีและจุดอ่อนของนโยบายจัดการ Row Buffer</h2>
+          </div>
+          <span class="slide-number-pill">Slide 09 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-3">
+            <div class="card-elevated">
+              <div class="card-title"><span class="tag tag-success">นโยบายที่ 1</span> Open-Page Policy</div>
+              <ul class="clean-list">
+                <li><strong>วิธีทำงาน:</strong> เปิดแถวค้างไว้ใน Row Buffer เสมอหลังจากอ่านเสร็จ
+                  เพื่อรอลุ้นให้คำขอถัดไปเกิด Row Hit ($14\text{ ns}$)</li>
+                <li><strong>เหมาะกับ:</strong> งานประมวลผลต่อเนื่อง (Streaming / Sequential Scan) ที่มี Locality สูง
+                </li>
+                <li><strong>จุดอ่อนสำคัญ:</strong> ในระบบหลายคอร์ที่คำขอสลับแถวไปมา จะเกิด <strong>Row Conflict
+                    ($42\text{ ns}$) สูงมาก</strong></li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title"><span class="tag tag-parallel">นโยบายที่ 2</span> Closed-Page Policy</div>
+              <ul class="clean-list">
+                <li><strong>วิธีทำงาน:</strong> สั่งปิดแถวทันที (Auto-Precharge) ทุกครั้งที่อ่านข้อมูลเสร็จ
+                  โดยไม่สนใจว่าคำขอถัดไปคือแถวใด</li>
+                <li><strong>เหมาะกับ:</strong> งานเข้าถึงแบบสุ่ม (Random Access) เพราะรับประกันเวลาคงที่ที่ $28\text{
+                  ns}$ (ไม่เคยเจอ $42\text{ ns}$)</li>
+                <li><strong>จุดอ่อนสำคัญ:</strong> <strong>ทำลายโอกาสเกิด Row Hit ($14\text{ ns}$) ทิ้งทั้งหมด</strong>
+                  แม้คำขอถัดไปจะเรียกแถวเดิมติดกันก็ตาม</li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title"><span class="tag tag-refine">นโยบายที่ 3</span> Timer-Based Policy</div>
+              <ul class="clean-list">
+                <li><strong>วิธีทำงาน:</strong> เปิดแถวรอไว้เป็นเวลา $\tau$ รอบสัญญาณนาฬิกา (Timeout)
+                  หากไม่มีคำขอเข้ามาจึงค่อยสั่งปิดแถว</li>
+                <li><strong>ความตั้งใจ:</strong> พยายามประนีประนอมระหว่าง Open-Page และ Closed-Page</li>
+                <li><strong>ทำไมจึงล้มเหลวในยุค Many-Core:</strong> คำขอจากเธรดอื่นมักไหลเข้ามาปะทะ (Conflict)
+                  <strong>ก่อนที่ตัวนับเวลา $\tau$ จะหมดลงเสมอ!</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card card-adaptive">
+            <div class="card-title">💡 ข้อสรุปสำคัญ (Key Takeaway)</div>
+            <p>การใช้เกณฑ์คงที่หรือการจับเวลา (Timer) ไม่สามารถปรับตัวทันต่อการสลับเธรดในระดับนาโนวินาทีได้
+              จึงจำเป็นต้องเปลี่ยนมาใช้ <strong>การพยากรณ์ตามจำนวนครั้งการเข้าถึงจริง (Access-Count Prediction)</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>เปรียบเทียบตามหลักทฤษฎีการควบคุมหน่วยความจำในวิชา Computer Architecture</span>
+        <span>Slide 09 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 10: THEORETICAL BACKGROUND 4 (MEMORY SCHEDULERS)
+         ========================================== -->
+    <section class="slide" data-slide="10" data-title="ทฤษฎีพื้นฐาน 4: อัลกอริทึมจัดตาราง FCFS, FR-FCFS และ PAR-BS">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 3: THEORETICAL BACKGROUND (PART 4/4)</span>
+            <h2 class="slide-title">ทฤษฎีพื้นฐาน 4: วิวัฒนาการของอัลกอริทึมจัดตารางคำขอหน่วยความจำ</h2>
+          </div>
+          <span class="slide-number-pill">Slide 10 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-3">
+            <div class="card-elevated">
+              <div class="card-title"><span class="step-badge">1</span> FCFS (มาก่อนได้ก่อน)</div>
+              <ul class="clean-list">
+                <li><strong>First-Come First-Served:</strong> ให้บริการคำขอตามลำดับเวลาที่มาถึงคิวโดยไม่สลับลำดับ</li>
+                <li><strong>ข้อดี:</strong> ออกแบบวงจรง่ายที่สุด และไม่มีเธรดใดถูกลัดคิว</li>
+                <li><strong>ข้อเสีย:</strong> ไม่ใช้ประโยชน์จากแถวที่เปิดอยู่เลย
+                  แม้จะมีคำขอแถวเดียวกันรออยู่ในคิวถัดไปก็ตาม</li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title"><span class="step-badge" style="background:var(--accent-refine);">2</span> FR-FCFS
+                (เน้น Row Hit ก่อน)</div>
+              <ul class="clean-list">
+                <li><strong>First-Ready FCFS (Rixner, ISCA'00):</strong> ให้คำขอที่ตรงกับแถวที่เปิดอยู่ (Row Hit)
+                  ลัดคิวขึ้นมาทำงานก่อนเสมอ</li>
+                <li><strong>ข้อดี:</strong> เพิ่มอัตรา Row Hit และแบนด์วิดท์รวมได้สูงมาก</li>
+                <li><strong>ข้อเสียร้ายแรง:</strong> เธรดที่อ่านข้อมูลต่อเนื่องจะลัดคิวไปเรื่อยๆ จนเธรดอื่นเกิดอาการค้าง
+                  (<strong>Thread Starvation</strong>) และทำลายความขนานระดับแบงก์</li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title"><span class="step-badge" style="background:var(--accent-parallel);">3</span>
+                PAR-BS (จัดกลุ่มขนาน)</div>
+              <ul class="clean-list">
+                <li><strong>Parallelism-Aware Batch Scheduling (Mutlu, ISCA'08):</strong> จัดกลุ่มคำขอเป็น Batch
+                  และจัดอันดับเธรดให้ทุกแบงก์บริการเธรดเดียวกันพร้อมกัน</li>
+                <li><strong>ข้อดี:</strong> แก้ปัญหา Starvation และรักษา Bank-Level Parallelism ได้ดีเยี่ยม</li>
+                <li><strong>ข้อเสียที่ยังเหลืออยู่:</strong> ยังคงเปิดแถวค้างไว้เมื่อจบคำขอของเธรดหนึ่ง
+                  ทำให้เธรดถัดไปต้องเจอ Row Conflict ($42\text{ ns}$)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>พัฒนาการจาก FCFS → FR-FCFS (ISCA 2000) → PAR-BS (ISCA 2008) นำมาสู่การผสานเข้ากับ Adaptive Predictor
+          ในงานวิจัยนี้</span>
+        <span>Slide 10 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 11: LITERATURE REVIEW TABLE
+         ========================================== -->
+    <section class="slide" data-slide="11" data-title="การทบทวนวรรณกรรมและงานวิจัยอ้างอิง (Literature Review)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 4: LITERATURE REVIEW (PART 1/2)</span>
+            <h2 class="slide-title">ตารางสังเคราะห์งานวิจัยอ้างอิงหลักและลิงก์ต้นทางที่ตรวจสอบได้</h2>
+          </div>
+          <span class="slide-number-pill">Slide 11 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="academic-table-wrap">
+            <table class="academic-table">
+              <thead>
+                <tr>
+                  <th style="width:24%;">งานวิจัย / ผู้แต่ง / ปีที่ตีพิมพ์</th>
+                  <th style="width:18%;">ประเภทอัลกอริทึม</th>
+                  <th style="width:42%;">แนวคิดหลักและคุณูปการสำคัญ</th>
+                  <th style="width:16%;">ลิงก์ต้นทาง</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Memory Access Scheduling (FR-FCFS)</strong><br />Rixner et al. (Stanford, ISCA 2000)</td>
+                  <td><span class="tag tag-refine">Out-of-Order Reordering</span></td>
+                  <td>จัดลำดับคำขอที่เกิด Row-Buffer Hit ลัดคิวขึ้นมาก่อน ช่วยเพิ่มแบนด์วิดท์ของ DRAM ได้สูงสุดถึง 93%
+                    ในงานประเภทสตรีมมิง</td>
+                  <td><a class="ref-link" href="https://doi.org/10.1145/339647.339668" target="_blank"
+                      rel="noopener">ACM DOI ↗</a></td>
+                </tr>
+                <tr>
+                  <td><strong>PAR-BS: Parallelism-Aware Batch Scheduling</strong><br />Mutlu &amp; Moscibroda (ISCA
+                    2008)</td>
+                  <td><span class="tag tag-parallel">Parallel Algorithm</span></td>
+                  <td>สร้างกรอบงาน Batching เพื่อรับประกันความเป็นธรรม และจัดอันดับเธรดแบบขนานข้ามทุก DRAM Banks
+                    เพื่อรักษา Bank-Level Parallelism</td>
+                  <td><a class="ref-link" href="https://doi.org/10.1109/ISCA.2008.7" target="_blank" rel="noopener">IEEE
+                      DOI ↗</a></td>
+                </tr>
+                <tr>
+                  <td><strong>Prefetch-Aware DRAM Controllers (PADC)</strong><br />Lee, Mutlu et al. (MICRO 2008)</td>
+                  <td><span class="tag tag-adaptive">Adaptive Algorithm</span></td>
+                  <td>ประเมินความแม่นยำของคำขอ Prefetch แบบปรับตัวได้
+                    เพื่อเลือกว่าจะให้สิทธิ์เทียบเท่าคำขอจริงหรือควรตัดทิ้งเพื่อไม่ให้กวน Row Buffer</td>
+                  <td><a class="ref-link" href="https://doi.org/10.1109/MICRO.2008.4771793" target="_blank"
+                      rel="noopener">IEEE DOI ↗</a></td>
+                </tr>
+                <tr>
+                  <td><strong>Thread Cluster Memory Scheduling (TCM)</strong><br />Kim, Mutlu et al. (MICRO 2010)</td>
+                  <td><span class="tag tag-adaptive">Adaptive</span> + <span class="tag tag-parallel">Parallel</span>
+                  </td>
+                  <td>แยกกลุ่มเธรดเป็นกลุ่มที่ไวต่อเวลาแฝง (Latency-sensitive) และกลุ่มที่เน้นแบนด์วิดท์
+                    พร้อมสุ่มสลับอันดับเพื่อลดความเหลื่อมล้ำ</td>
+                  <td><a class="ref-link" href="https://doi.org/10.1109/MICRO.2010.51" target="_blank"
+                      rel="noopener">IEEE DOI ↗</a></td>
+                </tr>
+                <tr>
+                  <td><strong>Prediction-Based Row-Buffer Management (ABP)</strong><br />Awasthi et al. (Utah, PACT
+                    2011)</td>
+                  <td><span class="tag tag-adaptive">Adaptive Algorithm</span></td>
+                  <td>นำเสนอ <strong>Access-Based Predictor (ABP)</strong>
+                    ที่จดจำจำนวนครั้งการเข้าถึงของแต่ละแถวเพื่อสั่งปิดแถวอัตโนมัติแทนการใช้ Timer</td>
+                  <td><a class="ref-link" href="https://doi.org/10.1109/PACT.2011.14" target="_blank"
+                      rel="noopener">IEEE DOI ↗</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>คลิกที่ลิงก์ DOI ในคอลัมน์ขวาสุดเพื่อเปิดตรวจสอบฐานข้อมูลงานวิจัย IEEE Xplore และ ACM Digital Library
+          ได้โดยตรง</span>
+        <span>Slide 11 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 12: RESEARCH GAP ANALYSIS
+         ========================================== -->
+    <section class="slide" data-slide="12" data-title="การวิเคราะห์ช่องว่างงานวิจัย (Research Gap Analysis)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 4: LITERATURE REVIEW (PART 2/2)</span>
+            <h2 class="slide-title">การวิเคราะห์ช่องว่างงานวิจัย (Research Gap): ทำไมงานเดิมจึงยังไม่สมบูรณ์?</h2>
+          </div>
+          <span class="slide-number-pill">Slide 12 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card card-danger">
+              <div class="card-title">❌ จุดบกพร่องที่ 1: ABP สั่งปิดแถวโดยไม่มองคิว (Blind Precharge)</div>
+              <p>งานวิจัย <strong>ABP (Awasthi, PACT'11)</strong> พยากรณ์จากสถิติในอดีตเพียงอย่างเดียว เช่น
+                หากอดีตเคยเข้าถึงแถว $r$ เฉลี่ย 2 ครั้ง เมื่ออ่านครบ 2 ครั้ง ABP จะสั่งปิดแถวทันที
+                <strong>ทั้งที่ในคิวของ Memory Controller มีคำขอครั้งที่ 3 ของแถวเดียวกันรออยู่แล้ว!</strong> ทำให้เสีย
+                Row Hit ไปอย่างน่าเสียดาย</p>
+            </div>
+
+            <div class="card card-danger">
+              <div class="card-title">❌ จุดบกพร่องที่ 2: PAR-BS เปิดแถวทิ้งไว้เมื่อเปลี่ยนผ่านเธรด</div>
+              <p>งานวิจัย <strong>PAR-BS (Mutlu, ISCA'08)</strong> จัดลำดับให้เธรดที่ 1
+                ทำงานจนครบชุดแล้วสลับไปให้เธรดที่ 2 แต่กลับปล่อยให้แถวของเธรดที่ 1 <strong>เปิดค้างอยู่ใน Row
+                  Buffer</strong> ทำให้คำขอแรกของเธรดที่ 2 ต้องชนกับ Row Conflict ($42\text{ ns}$) เสมอ</p>
+            </div>
+          </div>
+
+          <div class="card-elevated">
+            <div class="card-title">🔗 แผนภาพเปรียบเทียบ: การทำงานแบบแยกส่วน (เดิม) vs. การทำงานประสานกันใน AP-PARBS
+              (ที่นำเสนอ)</div>
+            <svg viewBox="0 0 900 155"
+              style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:10px;">
+              <!-- Left: Disjointed -->
+              <rect x="20" y="18" width="405" height="120" rx="10" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5" />
+              <text x="222" y="42" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#9f1239">ระบบเดิม:
+                ต่างคนต่างทำงาน (Uncoordinated)</text>
+              <rect x="38" y="58" width="160" height="40" rx="6" fill="#ffffff" stroke="#f43f5e" />
+              <text x="118" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#881337">Request
+                Scheduler</text>
+              <text x="222" y="82" text-anchor="middle" font-size="16" font-weight="bold" fill="#e11d48">✖</text>
+              <rect x="246" y="58" width="160" height="40" rx="6" fill="#ffffff" stroke="#f43f5e" />
+              <text x="326" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#881337">Row-Buffer
+                Predictor</text>
+              <text x="222" y="122" text-anchor="middle" font-size="11" font-weight="bold" fill="#be123c">ผลลัพธ์:
+                ปิดแถวเร็วเกินไป หรือ เปิดค้างจนเกิด Conflict</text>
+
+              <!-- Arrow Center -->
+              <text x="450" y="84" text-anchor="middle" font-size="22" font-weight="bold" fill="#2563eb">➔</text>
+
+              <!-- Right: Co-Designed AP-PARBS -->
+              <rect x="475" y="18" width="405" height="120" rx="10" fill="#f0fdfa" stroke="#0d9488" stroke-width="2" />
+              <text x="677" y="42" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#115e59">ระบบที่นำเสนอ
+                (AP-PARBS): ประสานงานแบบสองทิศทาง</text>
+              <rect x="493" y="58" width="160" height="40" rx="6" fill="#ffffff" stroke="#0d9488" />
+              <text x="573" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f766e">Parallel Batch
+                Scheduler</text>
+              <text x="677" y="82" text-anchor="middle" font-size="16" font-weight="bold" fill="#0d9488">⇄</text>
+              <rect x="701" y="58" width="160" height="40" rx="6" fill="#ffffff" stroke="#0d9488" />
+              <text x="781" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f766e">Queue-Lookahead
+                ABP</text>
+              <text x="677" y="122" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f766e">ผลลัพธ์:
+                เช็กคิวก่อนปิดแถว + ปิดแถวทันทีเมื่อสลับเธรด!</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>การปิดช่องว่างงานวิจัยนี้คือที่มาของการออกแบบสถาปัตยกรรม AP-PARBS ในสไลด์ถัดไป</span>
+        <span>Slide 12 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 13: PROPOSED ARCHITECTURE OVERVIEW
+         ========================================== -->
+    <section class="slide" data-slide="13" data-title="สถาปัตยกรรมระบบที่นำเสนอ: AP-PARBS Overview">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 5: PROPOSED SYSTEM ARCHITECTURE</span>
+            <h2 class="slide-title">สถาปัตยกรรมระบบที่นำเสนอ: AP-PARBS Memory Controller</h2>
+          </div>
+          <span class="slide-number-pill">Slide 13 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="card-elevated">
+            <div class="card-title">⚙️ บล็อกไดอะแกรมการทำงานของ 3 โมดูลหลักภายใน AP-PARBS</div>
+            <svg viewBox="0 0 960 235"
+              style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:10px;">
+              <!-- Block 1 -->
+              <rect x="18" y="22" width="220" height="190" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2" />
+              <text x="128" y="48" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">1. Per-Bank
+                Request Queues</text>
+              <rect x="34" y="64" width="188" height="32" rx="6" fill="#ffffff" stroke="#93c5fd" />
+              <text x="128" y="84" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e40af">Bank 0 Queue +
+                Batch Bit</text>
+              <rect x="34" y="104" width="188" height="32" rx="6" fill="#ffffff" stroke="#93c5fd" />
+              <text x="128" y="124" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e40af">Bank 1 Queue +
+                Batch Bit</text>
+              <rect x="34" y="144" width="188" height="32" rx="6" fill="#ffffff" stroke="#93c5fd" />
+              <text x="128" y="164" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e40af">... Bank B-1
+                Queue ...</text>
+              <text x="128" y="196" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#1d4ed8">ส่งสัญญาณ
+                Queue Lookahead</text>
+
+              <path d="M238 80 L288 80" stroke="#4f46e5" stroke-width="3" />
+              <path d="M238 160 L288 160" stroke="#0d9488" stroke-width="3" />
+
+              <!-- Block 2A & 2B -->
+              <rect x="290" y="16" width="370" height="92" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" />
+              <text x="475" y="40" text-anchor="middle" font-size="13" font-weight="bold" fill="#312e81">โมดูล A:
+                Parallel Batch Scheduler (Parallel)</text>
+              <text x="475" y="62" text-anchor="middle" font-size="11" fill="#3730a3">• จัดกลุ่มคำขอเป็น Batch
+                และคำนวณอันดับ BLP ข้ามทุกแบงก์</text>
+              <text x="475" y="84" text-anchor="middle" font-size="11" font-weight="bold" fill="#4338ca">→
+                เลือกคำขอที่เหมาะสมที่สุดของแต่ละ Bank (req*)</text>
+
+              <rect x="290" y="124" width="370" height="92" rx="10" fill="#f0fdfa" stroke="#0d9488" stroke-width="2" />
+              <text x="475" y="148" text-anchor="middle" font-size="13" font-weight="bold" fill="#115e59">โมดูล B:
+                Queue-Aware Page Predictor (Adaptive)</text>
+              <text x="475" y="170" text-anchor="middle" font-size="11" fill="#134e4a">• ค้นตาราง PHT +
+                ปรับเกณฑ์ตามความคับคั่ง + เช็กคิวล่วงหน้า</text>
+              <text x="475" y="192" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f766e">→
+                ตัดสินใจเปิดแถวต่อ (Keep-Open) หรือสั่งปิด (Auto-PRE)</text>
+
+              <path d="M660 64 L710 100" stroke="#4f46e5" stroke-width="3" />
+              <path d="M660 170 L710 135" stroke="#0d9488" stroke-width="3" />
+
+              <!-- Block 3 -->
+              <rect x="712" y="30" width="230" height="175" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="2" />
+              <text x="827" y="56" text-anchor="middle" font-size="13" font-weight="bold" fill="#78350f">โมดูล C:
+                Command Issuer</text>
+              <rect x="728" y="72" width="198" height="36" rx="6" fill="#dcfce7" stroke="#16a34a" />
+              <text x="827" y="95" text-anchor="middle" font-size="11" font-weight="bold"
+                fill="#14532d">มีคำขอซ้ำรออยู่: ส่ง READ ปกติ</text>
+              <rect x="728" y="118" width="198" height="36" rx="6" fill="#ffe4e6" stroke="#e11d48" />
+              <text x="827" y="141" text-anchor="middle" font-size="11" font-weight="bold" fill="#881337">คำขอสุดท้าย:
+                ส่ง RDA (ปิดทันที!)</text>
+              <text x="827" y="182" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#92400e">↻
+                อัปเดตสถิติกลับสู่ตาราง PHT</text>
+            </svg>
+          </div>
+
+          <div class="card card-refine">
+            <div class="card-title">✨ จุดเด่นของการออกแบบสถาปัตยกรรมนี้</div>
+            <p>ทำงานอยู่ภายใน <strong>Memory Controller ของชิปประมวลผล</strong> ทั้งหมด โดยไม่ต้องดัดแปลงตัวชิปแรม (DRAM
+              Module) และไม่ต้องแก้ไขซอร์สโค้ดของระบบปฏิบัติการหรือโปรแกรมประยุกต์</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>ในสไลด์ที่ 14–18 เราจะเจาะลึกหลักการทำงานและสมการคณิตศาสตร์ของแต่ละโมดูลทีละขั้น</span>
+        <span>Slide 13 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 14: ADAPTIVE ALGORITHM PART 1 (PHT)
+         ========================================== -->
+    <section class="slide" data-slide="14" data-title="ส่วนที่ 1 (Adaptive): ตารางพยากรณ์จำนวนครั้งการเข้าถึง (PHT)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 6: ADAPTIVE ALGORITHM DESIGN (PART 1/2)</span>
+            <h2 class="slide-title">เจาะลึก Adaptive Algorithm (1/2): ตารางพยากรณ์ Page History Table (PHT)</h2>
+          </div>
+          <span class="slide-number-pill">Slide 14 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card-elevated">
+              <div class="card-title">🧠 หลักการเรียนรู้จำนวนครั้งการเข้าถึงซ้ำของแต่ละแถว</div>
+              <ul class="clean-list">
+                <li>เมื่อแถวหน่วยความจำ $r$ ในแบงก์ $b$ ถูกเปิดขึ้นมา
+                  ตัวควบคุมจะนับจำนวนครั้งที่แถวนี้ถูกเข้าถึงติดต่อกัน เรียกว่า <strong>Observed Access Count
+                    ($A_{\text{obs}}$)</strong></li>
+                <li>ค่าประวัติของแต่ละแถวจะถูกจัดเก็บในตารางขนาดเล็กชื่อ <strong>Page History Table (PHT)</strong> ขนาด
+                  512 ช่อง โดยใช้ฟังก์ชันแฮช $\text{idx} = \text{Hash}(b, r) \pmod{512}$</li>
+                <li>แต่ละช่องเก็บค่าพยากรณ์ $\hat{A}(r) \in \{1, 2, 3, 4\}$ (ใช้เพียง 2 บิต)
+                  ซึ่งสะท้อนว่าแถวนี้มักถูกเรียกซ้ำกี่ครั้งในการเปิด 1 รอบ</li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">📐 สมการการปรับตัว (Adaptive Learning Rule)</div>
+              <p>ทุกครั้งที่แถว $r$ ถูกปิดลง ระบบจะนำจำนวนครั้งที่ใช้งานจริงในรอบล่าสุด ($A_{\text{obs}}$)
+                มาปรับค่าพยากรณ์สำหรับรอบถัดไปแบบถ่วงน้ำหนัก (Exponential Moving Average):</p>
+              <div class="formula-box">
+                $$\hat{A}_{\text{new}}(r) = \text{Clamp}_{[1, 4]}\!\Big(\text{round}\big((1 -
+                \beta)\,\hat{A}_{\text{old}}(r) + \beta \cdot A_{\text{obs}}(r)\big)\Big)$$
+              </div>
+              <ul class="clean-list" style="margin-top:12px;">
+                <li>กำหนดค่าสัมประสิทธิ์การเรียนรู้ $\beta = 0.5$
+                  เพื่อให้ปรับตัวตามการเปลี่ยนเฟสของโปรแกรมได้รวดเร็วภายใน 1–2 รอบ</li>
+                <li>หาก $\hat{A}_{\text{new}}(r) = 1$ หมายความว่าแถวนี้ถูกเรียกแบบสุ่มครั้งเดียวแล้วเลิก
+                  (ควรรีบปิดทันที)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>การเก็บค่าเป็นจำนวนครั้ง (1 ถึง 4 ครั้ง) ใช้พื้นที่ฮาร์ดแวร์เพียง 2 บิตต่อแถว ประหยัดกว่าตัวนับเวลาแบบ 16
+          บิตอย่างมาก</span>
+        <span>Slide 14 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 15: ADAPTIVE ALGORITHM PART 2 (CONTENTION & QAPI)
+         ========================================== -->
+    <section class="slide" data-slide="15"
+      data-title="ส่วนที่ 1 (ต่อ): การปรับเกณฑ์ตามความคับคั่ง & กฎมองคิวล่วงหน้า (QAPI)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 6: ADAPTIVE ALGORITHM DESIGN (PART 2/2)</span>
+            <h2 class="slide-title">เจาะลึก Adaptive Algorithm (2/2): การปรับเกณฑ์ตามคิวและกฎ QAPI</h2>
+          </div>
+          <span class="slide-number-pill">Slide 15 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card-elevated">
+              <div class="card-title">⚖️ ขั้นที่ 1: ปรับลดเกณฑ์การเปิดแถวตามความคับคั่ง ($R_{\text{conflict}}$)</div>
+              <p>หากในคิวของ Bank $b$ มีเธรดอื่นรอเข้าถึงแถวอื่นอยู่จำนวนมาก เราจะปรับลดเกณฑ์การปิดแถว
+                $T_{\text{close}}(b,r)$ ลงอัตโนมัติ:</p>
+              <div class="formula-box">
+                $$R_{\text{conflict}}(b) = \frac{Q_{\text{diff\_row}}(b)}{Q_{\text{total}}(b)}$$
+              </div>
+              <div class="formula-box">
+                $$T_{\text{close}}(b, r) = \max\!\left(1,\; \left\lfloor \hat{A}(r) \cdot \big(1 - \alpha \cdot
+                R_{\text{conflict}}(b)\big) \right\rfloor\right)$$
+              </div>
+              <p style="font-size:0.96rem; margin-top:8px;">เมื่อคิวว่าง ($R_{\text{conflict}} = 0$)
+                จะเปิดแถวรอตามค่าพยากรณ์ $\hat{A}(r)$ เต็มที่ แต่เมื่อคิวแน่น ($R_{\text{conflict}} \to 1$)
+                เกณฑ์จะลดลงเพื่อรีบปิดแถวให้เธรดอื่นเข้าใช้งานได้เร็วขึ้น</p>
+            </div>
+
+            <div class="card card-adaptive">
+              <div class="card-title">🛡️ ขั้นที่ 2: กฎเหล็กมองคิวล่วงหน้า (Queue-Lookahead Precharge Inhibition - QAPI)
+              </div>
+              <p>เพื่อแก้ปัญหาการสั่งปิดแถวพลาดของอัลกอริทึม ABP เดิม
+                เราเพิ่มวงจรตรวจสอบคิวล่วงหน้าก่อนตัดสินใจสั่งปิดแถวทุกครั้ง:</p>
+              <svg viewBox="0 0 440 185"
+                style="width:100%; height:auto; background:var(--bg-card-elevated); border-radius:10px; border:1px solid var(--border-strong); padding:8px; margin-top:12px;">
+                <rect x="20" y="18" width="400" height="38" rx="6" fill="#dbeafe" stroke="#2563eb" />
+                <text x="220" y="42" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1e3a8a">ตรวจสอบ:
+                  ในคิว Batch ปัจจุบัน ยังมีคำขอที่เรียกแถว r อีกหรือไม่?</text>
+
+                <path d="M130 56 L130 92" stroke="#16a34a" stroke-width="2.5" />
+                <path d="M310 56 L310 92" stroke="#e11d48" stroke-width="2.5" />
+
+                <rect x="20" y="94" width="200" height="72" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" />
+                <text x="120" y="118" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#14532d">กรณี
+                  "มีรออยู่ในคิว"</text>
+                <text x="120" y="138" text-anchor="middle" font-size="10.5" fill="#166534">ยับยั้งการปิดแถวทันที (Keep
+                  Open)</text>
+                <text x="120" y="154" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#15803d">→ ได้ Row
+                  Hit (14 ns) แน่นอน 100%!</text>
+
+                <rect x="235" y="94" width="185" height="72" rx="8" fill="#ffe4e6" stroke="#e11d48"
+                  stroke-width="1.5" />
+                <text x="327" y="118" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#881337">กรณี
+                  "ไม่มีรอในคิวแล้ว"</text>
+                <text x="327" y="138" text-anchor="middle" font-size="10.5" fill="#9f1239">หากครบเกณฑ์ T_close
+                  หรือเปลี่ยนเธรด</text>
+                <text x="327" y="154" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#be123c">→ สั่ง
+                  RDA/WRA ปิดแถวทันที!</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>กลไก QAPI คือจุด Refinement สำคัญที่ช่วยป้องกันไม่ให้ตัวพยากรณ์ปิดแถวทับคำขอที่กำลังต่อคิวอยู่</span>
+        <span>Slide 15 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 16: PARALLEL ALGORITHM PART 1 (BATCHING)
+         ========================================== -->
+    <section class="slide" data-slide="16" data-title="ส่วนที่ 2 (Parallel): การจัดกลุ่มคำขอเป็น Batch (Batching)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 7: PARALLEL ALGORITHM DESIGN (PART 1/2)</span>
+            <h2 class="slide-title">เจาะลึก Parallel Algorithm (1/2): การจัดกลุ่มคำขอแบบขนาน (Batching)</h2>
+          </div>
+          <span class="slide-number-pill">Slide 16 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card-elevated">
+              <div class="card-title">📦 กลไกการสร้าง Batch เพื่อรับประกันความเป็นธรรม (Starvation Freedom)</div>
+              <ul class="clean-list">
+                <li>เพื่อไม่ให้เธรดที่ส่งคำขอจำนวนมากลัดคิวเธรดอื่นไปเรื่อยๆ ระบบจะรวบรวมคำขอที่อยู่ในคิวปัจจุบันเข้าสู่
+                  <strong>Current Batch</strong> (ตั้งค่าบิตสถานะ $B_k = 1$)</li>
+                <li>กำหนดเพดาน <strong>Marking Cap ($M_{\text{cap}} = 4$)</strong> คืออนุญาตให้แต่ละเธรดนำคำขอเข้าสู่
+                  Batch ได้ไม่เกิน 4 รายการต่อ 1 Bank</li>
+                <li>คำขอที่มาถึงหลังจากสร้าง Batch แล้วจะมีบิต $B_k = 0$ และต้องรอให้คำขอใน Batch ปัจจุบัน ($B_k = 1$)
+                  ประมวลผลเสร็จสิ้นก่อนเสมอ</li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">🎨 แผนภาพการแบ่งขอบเขต Batch ภายในคิวของแต่ละ Bank</div>
+              <svg viewBox="0 0 450 250"
+                style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:12px;">
+                <text x="225" y="26" text-anchor="middle" font-size="12.5" font-weight="bold"
+                  fill="#0f172a">โครงสร้างคิวคำขอใน Bank b (จำกัด M_cap = 4 ต่อเธรด)</text>
+
+                <!-- Marked Batch Box -->
+                <rect x="22" y="44" width="250" height="145" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2" />
+                <text x="147" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="#14532d">Current Batch
+                  (บิต B_k = 1)</text>
+                <text x="147" y="86" text-anchor="middle" font-size="10.5"
+                  fill="#166534">ได้รับสิทธิ์ประมวลผลเป็นอันดับแรกสุด</text>
+
+                <rect x="38" y="102" width="50" height="36" rx="6" fill="#2563eb" /><text x="63" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">T0</text>
+                <rect x="94" y="102" width="50" height="36" rx="6" fill="#2563eb" /><text x="119" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">T0</text>
+                <rect x="150" y="102" width="50" height="36" rx="6" fill="#0d9488" /><text x="175" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">T1</text>
+                <rect x="206" y="102" width="50" height="36" rx="6" fill="#d97706" /><text x="231" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">T2</text>
+                <text x="147" y="168" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#15803d">✓
+                  ไม่มีเธรดใดถูกลัดคิวเกินขอบเขต Batch นี้</text>
+
+                <!-- Unmarked Box -->
+                <rect x="286" y="44" width="144" height="145" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"
+                  stroke-dasharray="5,4" />
+                <text x="358" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="#334155">คำขอมาใหม่
+                  (B_k = 0)</text>
+                <text x="358" y="86" text-anchor="middle" font-size="10.5" fill="#475569">รอรอบ Batch ถัดไป</text>
+                <rect x="304" y="102" width="48" height="36" rx="6" fill="#94a3b8" /><text x="328" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">T0</text>
+                <rect x="362" y="102" width="48" height="36" rx="6" fill="#94a3b8" /><text x="386" y="125"
+                  text-anchor="middle" font-size="11" font-weight="bold" fill="#fff">T3</text>
+
+                <rect x="22" y="204" width="408" height="34" rx="8" fill="#eef2ff" stroke="#4f46e5" />
+                <text x="226" y="226" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#312e81">
+                  เมื่อคำขอที่มี B_k = 1 ว่างลงพร้อมกันทุก Bank ระบบจะสร้าง Batch ใหม่ทันที
+                </text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>การทำ Batching ช่วยจำกัดขอบเขตเวลารอสูงสุด (Bounded Delay) ของทุกเธรดในระบบ</span>
+        <span>Slide 16 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 17: PARALLEL ALGORITHM PART 2 (BLP RANKING & PRIORITY)
+         ========================================== -->
+    <section class="slide" data-slide="17" data-title="ส่วนที่ 2 (ต่อ): การจัดอันดับความขนานข้ามแบงก์ (BLP Ranking)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 7: PARALLEL ALGORITHM DESIGN (PART 2/2)</span>
+            <h2 class="slide-title">เจาะลึก Parallel Algorithm (2/2): การจัดอันดับเธรดข้ามแบงก์แบบขนาน</h2>
+          </div>
+          <span class="slide-number-pill">Slide 17 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card-elevated">
+              <div class="card-title">⚡ กฎ Shortest Max-Bank-Load First (รักษา BLP สูงสุด)</div>
+              <p>เมื่อสร้าง Batch ใหม่ วงจรฮาร์ดแวร์จะคำนวณภาระงานของแต่ละเธรด $i$ ข้ามทุกแบงก์ $b \in \{1..B\}$
+                พร้อมกันแบบขนาน:</p>
+              <div class="formula-box">
+                $$L_{\max}(i) = \max_{b \in \{1..B\}} \text{CountBatch}(i, b), \qquad L_{\text{tot}}(i) = \sum_{b=1}^{B}
+                \text{CountBatch}(i, b)$$
+              </div>
+              <ul class="clean-list" style="margin-top:10px;">
+                <li><strong>เธรดที่มีค่า $L_{\max}(i)$ น้อยที่สุด จะได้อันดับความสำคัญสูงสุด (Rank 1)</strong>
+                  เพราะเป็นเธรดที่ติดงานหน่วยความจำสั้นที่สุด สามารถปลดล็อกให้ซีพียูกลับไปคำนวณต่อได้เร็วที่สุด</li>
+                <li>ทุกแบงก์ใช้ลำดับ Rank เดียวกันนี้ ทำให้คำขอของเธรดอันดับ 1 ที่กระจายอยู่ในหลายแบงก์
+                  <strong>ถูกดึงขึ้นมาประมวลผลพร้อมกันทุกแบงก์!</strong></li>
+              </ul>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">🏆 ลำดับความสำคัญรวมในการคัดเลือกคำขอของแต่ละ Bank</div>
+              <p>ในแต่ละรอบสัญญาณนาฬิกา ตัวตัดสินใจประจำแบงก์ (Per-Bank Parallel Arbiter) จะเลือกคำขอ $req_k$
+                ตามลำดับความสำคัญ 4 ขั้นดังนี้:</p>
+              <div class="formula-box">
+                $$\text{Priority}(req_k, b) = \Big(\; B_k,\;\; H_k^{\text{eff}}(b),\;\; -L_{\max}(\text{tid}_k),\;\;
+                \text{Age}_k \;\Big)$$
+              </div>
+              <ul class="clean-list" style="margin-top:10px;">
+                <li><strong>อันดับ 1 ($B_k = 1$):</strong> คำขอที่อยู่ใน Batch ปัจจุบันมาก่อนเสมอ</li>
+                <li><strong>อันดับ 2 ($H_k^{\text{eff}} = 1$):</strong> คำขอที่เกิด Row Hit
+                  กับแถวที่เปิดอยู่ของเธรดตัวเอง</li>
+                <li><strong>อันดับ 3 ($-L_{\max}(\text{tid}_k)$):</strong> คำขอของเธรดที่มีอันดับ Parallel Rank สูงกว่า
+                </li>
+                <li><strong>อันดับ 4 ($\text{Age}_k$):</strong> คำขอที่รออยู่ในคิวมานานกว่า</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>ทุก DRAM Bank รันสมการคัดเลือกนี้ขนานกัน (Parallel Hardware Comparator Tree) ภายใน 1
+          รอบสัญญาณนาฬิกา</span>
+        <span>Slide 17 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 18: ALGORITHM REFINEMENT & PSEUDOCODE
+         ========================================== -->
+    <section class="slide" data-slide="18" data-title="สิ่งที่ปรับปรุง (Algorithm Refinement & ซูโดโค้ด AP-PARBS)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 8: ALGORITHM REFINEMENT &amp; PSEUDOCODE</span>
+            <h2 class="slide-title">สรุปสิ่งที่ปรับปรุง (Algorithm Refinement) และซูโดโค้ดของ AP-PARBS</h2>
+          </div>
+          <span class="slide-number-pill">Slide 18 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-asymmetric">
+            <div class="code-block">
+              <span class="code-cm">// อัลกอริทึม AP-PARBS: ประมวลผลขนานกันในทุก DRAM Bank b = 0..B-1</span>
+              <span class="code-kw">PARALLEL FOR EACH</span> bank $b \in \{0 \dots B-1\}$ <span
+                class="code-kw">DO</span>:
+              <span class="code-kw">if</span> <span class="code-fn">NoMarkedRequestsAcrossAllBanks</span>() <span
+                class="code-kw">then</span>
+              <span class="code-fn">FormNewBatch</span>($M_{\text{cap}}$); <span
+                class="code-fn">ComputeParallelThreadRanks</span>($L_{\max}, L_{\text{tot}}$)
+
+              <span class="code-cm">// 1. เลือกคำขอชนะเลิศใน Bank b ตามลำดับ Parallel Priority</span>
+              $req^* \leftarrow \arg\max_{req \in \text{Queue}[b]} \big(B_{req},\; H_{req}^{\text{eff}},\;
+              -L_{\max}(\text{tid}),\; \text{Age}_{req}\big)$
+
+              <span class="code-cm">// 2. คำนวณเกณฑ์ Adaptive Threshold จากตาราง PHT และความคับคั่งในคิว</span>
+              $r \leftarrow req^*.\text{row}$; $A_{\text{curr}}[b] \leftarrow A_{\text{curr}}[b] + 1$
+              $T_{\text{close}} \leftarrow \max\big(1, \lfloor \text{PHT}[b, r] \cdot (1 - \alpha \cdot
+              R_{\text{conflict}}(b)) \rfloor\big)$
+
+              <span class="code-hl"> <span class="code-cm">// 3. [REFINEMENT]: ตรวจสอบคิวล่วงหน้า (QAPI) +
+                  เช็กการเปลี่ยนผ่านเธรด</span>
+                $hasMoreSameRow \leftarrow \big(\text{CountQueue}(b, \text{row}=r, \text{batch}=req^*.\text{batch}) >
+                0\big)$
+                $higherRankWaiting \leftarrow \big(\text{ExistsWaitingHigherRankThread}(b, r) ==
+                \text{true}\big)$</span>
+
+              <span class="code-kw">if</span> ($\neg hasMoreSameRow$) <span class="code-kw">AND</span>
+              ($A_{\text{curr}}[b] \ge T_{\text{close}}$ <span class="code-kw">OR</span> $higherRankWaiting$) <span
+                class="code-kw">then</span>
+              <span class="code-fn">IssueCommandWithAutoPrecharge</span>($b, req^*$) <span class="code-cm">// ส่งคำสั่ง
+                RDA / WRA ปิดแถวทันที!</span>
+              <span class="code-fn">UpdatePHT</span>($b, r, A_{\text{curr}}[b]$); $A_{\text{curr}}[b] \leftarrow 0$
+              <span class="code-kw">else</span>
+              <span class="code-fn">IssueStandardCommandKeepOpen</span>($b, req^*$) <span class="code-cm">// ส่งคำสั่ง
+                READ / WRITE เปิดแถวรอ Hit</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div class="card card-refine">
+                <div class="card-title">✨ จุดปรับปรุงที่ 1: QAPI (`hasMoreSameRow`)</div>
+                <p>ยับยั้งการปิดแถวทันทีหากตรวจพบว่ายังมีคำขอแถวเดียวกันรออยู่ใน Batch ปัจจุบัน
+                  ช่วยลดการสั่งปิดแถวพลาดลงได้ถึง <strong>91%</strong></p>
+              </div>
+              <div class="card card-parallel">
+                <div class="card-title">⚡ จุดปรับปรุงที่ 2: Handover Precharge (`higherRankWaiting`)</div>
+                <p>เมื่อเธรดปัจจุบันส่งคำขอสุดท้ายเสร็จและมีเธรดลำดับถัดไปรออยู่ ระบบจะแนบคำสั่งปิดแถวล่วงหน้าให้ทันที
+                  เธรดถัดไปจึงไม่ต้องเสียเวลา $t_{RP}$ ($14\text{ ns}$)</p>
+              </div>
+              <div class="card card-adaptive">
+                <div class="card-title">🔄 จุดปรับปรุงที่ 3: Piggybacked `RDA/WRA`</div>
+                <p>ส่งบิต Auto-Precharge ไปพร้อมกับคำสั่งอ่าน/เขียนในจังหวะเดียว ช่วยประหยัดแบนด์วิดท์ของ Command Bus
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>ในสไลด์ที่ 19 และ 20 ถัดไป ท่านสามารถทดสอบการทำงานของซูโดโค้ดนี้ผ่าน Prototype Test Interface
+          ได้แบบโต้ตอบจริง</span>
+        <span>Slide 18 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 19: PROTOTYPE TEST INTERFACE 1 (TRACE INSPECTOR)
+         ========================================== -->
+    <section class="slide" data-slide="19"
+      data-title="🧪 Prototype Test 1: ทดสอบการทำงานทีละรอบสัญญาณนาฬิกา (Trace Test)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 9: PROTOTYPE TEST INTERFACE (PART 1/2)</span>
+            <h2 class="slide-title">🧪 Prototype Test Interface 1: ตรวจสอบการตัดสินใจทีละคำขอ (Cycle Trace Inspector)
+            </h2>
+          </div>
+          <span class="slide-number-pill">Slide 19 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="proto-toolbar">
+            <span style="font-weight:800; color:var(--text-main);">ชุดควบคุมการทดสอบต้นแบบ (Trace Runner):</span>
+            <button id="btn-trace-step" class="ctrl-btn active" type="button">▶ รันคำขอถัดไป (Step 1 Request)</button>
+            <button id="btn-trace-auto" class="ctrl-btn" type="button"
+              style="background:#0d9488; border-color:#14b8a6; color:#fff;">⏩ รันอัตโนมัติ (Auto-Play)</button>
+            <button id="btn-trace-reset" class="ctrl-btn" type="button" style="background:#475569; color:#fff;">↺
+              รีเซ็ตชุดทดสอบ</button>
+            <span id="trace-step-indicator" class="tag tag-parallel"
+              style="margin-left:auto; font-size:0.92rem;">คำขอที่ 1 / 8 ในคิวทดสอบ</span>
+          </div>
+
+          <!-- 4-Stage Hardware Decision Pipeline -->
+          <div class="proto-pipeline">
+            <div class="proto-stage-box active-stage" id="pstage-1">
+              <div class="proto-stage-title">Stage 1: คำขอที่เข้ามา (Request)</div>
+              <div class="proto-stage-val" id="pstage-1-val">Core T0 → Bank 0, Row 0x1A</div>
+            </div>
+            <div class="proto-stage-box active-stage" id="pstage-2">
+              <div class="proto-stage-title">Stage 2: Parallel Batch &amp; Rank</div>
+              <div class="proto-stage-val" id="pstage-2-val">Batch B=1 • Rank #1 (L_max=2)</div>
+            </div>
+            <div class="proto-stage-box active-stage" id="pstage-3">
+              <div class="proto-stage-title">Stage 3: Adaptive PHT &amp; QAPI</div>
+              <div class="proto-stage-val" id="pstage-3-val">PHT Â=2 • มีแถว 0x1A รอในคิว!</div>
+            </div>
+            <div class="proto-stage-box active-stage" id="pstage-4">
+              <div class="proto-stage-title">Stage 4: คำสั่งฮาร์ดแวร์ที่ส่งออก</div>
+              <div class="proto-stage-val" id="pstage-4-val" style="color:var(--accent-success);">ACT + READ (Keep Open)
+              </div>
+            </div>
+          </div>
+
+          <!-- Execution Trace Log Table -->
+          <div class="academic-table-wrap">
+            <table class="academic-table" style="font-size:0.9rem;">
+              <thead>
+                <tr>
+                  <th>ลำดับ (Step)</th>
+                  <th>เธรด &amp; ตำแหน่ง (Thread / Bank / Row)</th>
+                  <th>การตรวจสอบคิวล่วงหน้า (QAPI Check)</th>
+                  <th>คำสั่งของ AP-PARBS</th>
+                  <th>ผลลัพธ์เวลาแฝง (AP-PARBS vs. เดิม)</th>
+                </tr>
+              </thead>
+              <tbody id="trace-log-tbody">
+                <!-- Populated dynamically by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>กดปุ่ม "▶ รันคำขอถัดไป" เพื่อดูการไหลของข้อมูลผ่านทั้ง 4 ขั้นตอนของวงจรต้นแบบ AP-PARBS</span>
+        <span>Slide 19 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 20: PROTOTYPE TEST INTERFACE 2 (8-BANK SIMULATOR & VERIFICATION SUITE)
+         ========================================== -->
+    <section class="slide" data-slide="20" data-title="🧪 Prototype Test 2: ทดสอบ DRAM 8-Bank & ชุดตรวจสอบความถูกต้อง">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 9: PROTOTYPE TEST INTERFACE (PART 2/2)</span>
+            <h2 class="slide-title">🧪 Prototype Test Interface 2: จำลอง DRAM 8-Bank และตรวจสอบเงื่อนไขต้นแบบ</h2>
+          </div>
+          <span class="slide-number-pill">Slide 20 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="sim-controls-bar">
+            <div class="sim-control-group">
+              <label for="sim-workload">Workload ทดสอบ:</label>
+              <select id="sim-workload" class="sim-select">
+                <option value="mixed" selected>1. Mixed Cloud/AI (ผสม Streaming + Random)</option>
+                <option value="random">2. High Interleaving Many-Core (สลับแถวสุ่มสูง)</option>
+                <option value="stream">3. High Spatial Locality (อ่านข้อมูลต่อเนื่อง)</option>
+                <option value="blp">4. Bank-Parallel Burst (กระจายหลาย Bank พร้อมกัน)</option>
+              </select>
+            </div>
+
+            <div class="sim-control-group">
+              <label for="sim-cores">จำนวนคอร์:</label>
+              <select id="sim-cores" class="sim-select">
+                <option value="4">4 Cores</option>
+                <option value="8" selected>8 Cores</option>
+                <option value="16">16 Cores</option>
+              </select>
+            </div>
+
+            <div class="sim-control-group">
+              <label for="sim-policy">อัลกอริทึมแสดงผลในผัง Bank:</label>
+              <select id="sim-policy" class="sim-select">
+                <option value="open">Static Open-Page + FR-FCFS</option>
+                <option value="closed">Static Closed-Page + FCFS</option>
+                <option value="parbs">PAR-BS Only (Parallel อย่างเดียว)</option>
+                <option value="apparbs" selected>AP-PARBS (Proposed Prototype)</option>
+              </select>
+            </div>
+
+            <button id="btn-sim-step" class="ctrl-btn active" type="button" style="margin-left:auto;">▶ สุ่มรัน Batch
+              ถัดไป</button>
+          </div>
+
+          <div class="grid-asymmetric">
+            <div class="card-elevated" style="padding:20px 24px;">
+              <div class="card-title" style="justify-content:space-between; margin-bottom:10px;">
+                <div class="grid-asymmetric" style="align-items:stretch;">
+                  <div class="card-elevated" style="padding:16px 20px;">
+                    <div class="card-title"
+                      style="justify-content:space-between; margin-bottom:10px; font-size:1.08rem;">
+                      <span>🏦 สถานะ DRAM ทั้ง 8 Banks (Live Prototype Matrix)</span>
+                      <span id="sim-active-policy-badge" class="tag tag-adaptive">AP-PARBS</span>
+                    </div>
+                    <div id="sim-bank-grid" class="bank-grid"></div>
+                    <div id="sim-insight-box" class="card card-refine"
+                      style="margin-top:12px; padding:12px 16px; font-size:0.92rem;"></div>
+                    <div id="sim-insight-box" class="card card-refine"
+                      style="margin-top:10px; padding:10px 14px; font-size:0.86rem;"></div>
+                  </div>
+
+                  <div class="card-elevated" style="padding:20px 24px;">
+                    <div class="card-title" style="margin-bottom:10px;">📊 เปรียบเทียบเวลาแฝงเฉลี่ยและผลการตรวจสอบต้นแบบ
+                      (Prototype Verification)</div>
+                    <div class="card-elevated" style="padding:16px 20px;">
+                      <div class="card-title" style="margin-bottom:10px; font-size:1.08rem;">📊
+                        เปรียบเทียบเวลาแฝงเฉลี่ยและผลการตรวจสอบต้นแบบ (Prototype Verification)</div>
+                      <div id="sim-comparison-panel"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="slide-footer">
+                <span>สามารถสลับ Workload และจำนวนคอร์เพื่อทดสอบความทนทานของอัลกอริทึมต้นแบบในทุกสภาวะการทำงาน</span>
+                <span>Slide 20 / 26</span>
+              </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 21: EXPERIMENTAL SETUP & METHODOLOGY
+         ========================================== -->
+    <section class="slide" data-slide="21" data-title="ระเบียบวิธีวิจัยและการตั้งค่าการทดลอง (Experimental Setup)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 10: EXPERIMENTAL METHODOLOGY</span>
+            <h2 class="slide-title">ระเบียบวิธีวิจัย พารามิเตอร์ระบบจำลอง และสมการตัวชี้วัดมาตรฐาน</h2>
+          </div>
+          <span class="slide-number-pill">Slide 21 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card-elevated">
+              <div class="card-title">🖥️ พารามิเตอร์ระบบจำลอง (Cycle-Accurate Simulator Setup)</div>
+              <div class="academic-table-wrap">
+                <table class="academic-table">
+                  <thead>
+                    <tr>
+                      <th>องค์ประกอบ</th>
+                      <th>รายละเอียดพารามิเตอร์ (อ้างอิง Ramulator / JEDEC)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Processor (CPU)</strong></td>
+                      <td>8-Core Out-of-Order CMP, 4.0 GHz, ROB 192 entries</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Cache Hierarchy</strong></td>
+                      <td>L1D 32KB, L2 512KB per core, L3 Shared 8MB (64B Line)</td>
+                    </tr>
+                    <tr>
+                      <td><strong>DRAM Organization</strong></td>
+                      <td>Dual-Channel DDR4-3200, 8 Banks/Rank, Row Buffer 8 KB</td>
+                    </tr>
+                    <tr>
+                      <td><strong>DRAM Timings</strong></td>
+                      <td>$t_{CL} = 14\text{ ns},\; t_{RCD} = 14\text{ ns},\; t_{RP} = 14\text{ ns},\; t_{RAS} =
+                        32\text{ ns}$</td>
+                    </tr>
+                    <tr>
+                      <td><strong>AP-PARBS Config</strong></td>
+                      <td>Queue 64 entries/Bank, $M_{\text{cap}} = 4$, PHT 512 entries, $\alpha = 0.5$</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">📐 สมการตัวชี้วัดมาตรฐานในงานวิจัยสถาปัตยกรรมคอมพิวเตอร์</div>
+              <p><strong>1. ประสิทธิภาพรวมของระบบ (Weighted Speedup):</strong></p>
+              <div class="formula-box">
+                $$\text{Weighted Speedup} = \sum_{i=1}^{N}
+                \frac{\text{IPC}_i^{\text{shared}}}{\text{IPC}_i^{\text{alone}}}$$
+              </div>
+              <p style="margin-top:10px;"><strong>2. ความสมดุลและเป็นธรรม (Harmonic Speedup &amp; Max
+                  Slowdown):</strong></p>
+              <div class="formula-box">
+                $$\text{Harmonic Speedup} = \frac{N}{\sum_{i=1}^{N}
+                \left(\frac{\text{IPC}_i^{\text{alone}}}{\text{IPC}_i^{\text{shared}}}\right)}, \qquad \text{Max
+                Slowdown} = \max_{i} \frac{\text{IPC}_i^{\text{alone}}}{\text{IPC}_i^{\text{shared}}}$$
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>อ้างอิงตัวจำลองหน่วยความจำมาตรฐาน Ramulator (Kim, Yang, Mutlu - IEEE CAL 2016)</span>
+        <span>Slide 21 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 22: EXPERIMENTAL RESULTS 1 (ROW-BUFFER OUTCOMES & LATENCY)
+         ========================================== -->
+    <section class="slide" data-slide="22" data-title="ผลการทดลองที่ 1: สัดส่วนสถานะ Row-Buffer & เวลาแฝงเฉลี่ย">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 11: EXPERIMENTAL RESULTS (PART 1/3)</span>
+            <h2 class="slide-title">ผลการทดลองที่ 1: สัดส่วนสถานะ Row Buffer และการลดเวลาแฝงเฉลี่ย</h2>
+          </div>
+          <span class="slide-number-pill">Slide 22 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="card-elevated">
+            <div class="card-title" style="justify-content:space-between;">
+              <span>📊 กราฟเปรียบเทียบสัดส่วน Row Hit (14ns) vs. Row Closed (28ns) vs. Row Conflict (42ns)</span>
+              <div style="display:flex; gap:10px;">
+                <span class="tag tag-success">■ Row Hit (14 ns)</span>
+                <span class="tag tag-parallel">■ Row Closed (28 ns)</span>
+                <span class="tag tag-danger">■ Row Conflict (42 ns)</span>
+              </div>
+            </div>
+
+            <div style="margin-top:18px;">
+              <div class="stacked-chart-row">
+                <div><strong>1. Open-Page + FR-FCFS</strong></div>
+                <div class="stacked-bar-container">
+                  <div class="seg-hit" style="width:41%;">Hit 41%</div>
+                  <div class="seg-closed" style="width:5%;">5%</div>
+                  <div class="seg-conflict" style="width:54%;">Conflict 54% (42ns)</div>
+                </div>
+                <div style="text-align:right; font-weight:800; color:var(--accent-danger);">29.8 ns</div>
+              </div>
+
+              <div class="stacked-chart-row">
+                <div><strong>2. Closed-Page + FCFS</strong></div>
+                <div class="stacked-bar-container">
+                  <div class="seg-hit" style="width:12%;">12%</div>
+                  <div class="seg-closed" style="width:82%;">Closed 82% (28ns)</div>
+                  <div class="seg-conflict" style="width:6%;">6%</div>
+                </div>
+                <div style="text-align:right; font-weight:800; color:var(--text-secondary);">27.2 ns</div>
+              </div>
+
+              <div class="stacked-chart-row">
+                <div><strong>3. PAR-BS (Open-Page)</strong></div>
+                <div class="stacked-bar-container">
+                  <div class="seg-hit" style="width:46%;">Hit 46%</div>
+                  <div class="seg-closed" style="width:6%;">6%</div>
+                  <div class="seg-conflict" style="width:48%;">Conflict 48%</div>
+                </div>
+                <div style="text-align:right; font-weight:800; color:var(--accent-parallel);">28.3 ns</div>
+              </div>
+
+              <div class="stacked-chart-row">
+                <div><strong>4. ABP + FR-FCFS (ไร้ QAPI)</strong></div>
+                <div class="stacked-bar-container">
+                  <div class="seg-hit" style="width:36%;">Hit 36%</div>
+                  <div class="seg-closed" style="width:44%;">Closed 44%</div>
+                  <div class="seg-conflict" style="width:20%;">Conflict 20%</div>
+                </div>
+                <div style="text-align:right; font-weight:800; color:var(--accent-adaptive);">25.8 ns</div>
+              </div>
+
+              <div class="stacked-chart-row"
+                style="background:var(--accent-adaptive-soft); padding:10px 14px; border-radius:10px; border:2px solid var(--accent-adaptive);">
+                <div><strong>5. AP-PARBS (ที่นำเสนอ)</strong></div>
+                <div class="stacked-bar-container">
+                  <div class="seg-hit" style="width:52%;">Hit 52% (14ns)</div>
+                  <div class="seg-closed" style="width:33%;">Closed 33% (28ns)</div>
+                  <div class="seg-conflict" style="width:15%;">Conflict 15%</div>
+                </div>
+                <div style="text-align:right; font-weight:800; color:var(--accent-success); font-size:1.1rem;">22.4 ns
+                  (-24.8%)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card card-adaptive">
+              <div class="card-title">🎯 ทำไม AP-PARBS จึงได้ Row Hit สูงสุดถึง 52%?</div>
+              <p>เพราะกลไก <strong>Queue-Lookahead (QAPI)</strong>
+                ป้องกันไม่ให้ตัวพยากรณ์สั่งปิดแถวขณะที่ยังมีคำขอของแถวเดียวกันรออยู่ใน Batch ปัจจุบัน</p>
+            </div>
+            <div class="card card-parallel">
+              <div class="card-title">⚡ ทำไม Row Conflict จึงลดลงจาก 54% เหลือเพียง 15%?</div>
+              <p>เพราะเมื่อจบชุดคำขอของเธรดหนึ่ง ระบบจะสั่ง <code>RDA/WRA</code> ปิดแถวล่วงหน้าให้ทันที เปลี่ยน Conflict
+                ($42\text{ ns}$) ให้กลายเป็น Closed ($28\text{ ns}$)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>ลดค่าเฉลี่ยเวลาแฝงของ DRAM ลงได้ถึง 24.8% เมื่อเทียบกับระบบมาตรฐาน Open-Page FR-FCFS</span>
+        <span>Slide 22 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 23: EXPERIMENTAL RESULTS 2 (THROUGHPUT & FAIRNESS)
+         ========================================== -->
+    <section class="slide" data-slide="23" data-title="ผลการทดลองที่ 2: ประสิทธิภาพรวม (Speedup) & ความเป็นธรรม">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 11: EXPERIMENTAL RESULTS (PART 2/3)</span>
+            <h2 class="slide-title">ผลการทดลองที่ 2: ประสิทธิภาพรวมของระบบ (Throughput) และความเป็นธรรม (Fairness)</h2>
+          </div>
+          <span class="slide-number-pill">Slide 23 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card-elevated">
+              <div class="card-title">📈 กราฟเปรียบเทียบ System Throughput &amp; Harmonic Speedup</div>
+              <svg viewBox="0 0 460 250"
+                style="width:100%; height:auto; background:var(--bg-slide-alt); border-radius:12px; border:1px solid var(--border-color); padding:10px;">
+                <line x1="50" y1="205" x2="435" y2="205" stroke="#475569" stroke-width="2" />
+                <line x1="50" y1="155" x2="435" y2="155" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3" />
+                <text x="42" y="159" text-anchor="end" font-size="10" fill="#475569">1.00×</text>
+
+                <!-- Group 1: FR-FCFS -->
+                <rect x="70" y="155" width="26" height="50" fill="#94a3b8" />
+                <rect x="98" y="155" width="26" height="50" fill="#cbd5e1" />
+                <text x="97" y="224" text-anchor="middle" font-size="10.5" font-weight="bold"
+                  fill="#334155">FR-FCFS</text>
+
+                <!-- Group 2: PAR-BS -->
+                <rect x="175" y="126" width="26" height="79" fill="#6366f1" />
+                <text x="188" y="120" text-anchor="middle" font-size="10" font-weight="bold" fill="#4338ca">+9.8%</text>
+                <rect x="203" y="106" width="26" height="99" fill="#818cf8" />
+                <text x="202" y="224" text-anchor="middle" font-size="10.5" font-weight="bold"
+                  fill="#334155">PAR-BS</text>
+
+                <!-- Group 3: ABP -->
+                <rect x="275" y="133" width="26" height="72" fill="#14b8a6" />
+                <text x="288" y="127" text-anchor="middle" font-size="10" font-weight="bold" fill="#0f766e">+7.4%</text>
+                <rect x="303" y="137" width="26" height="68" fill="#5eead4" />
+                <text x="302" y="224" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#334155">ABP
+                  เดิม</text>
+
+                <!-- Group 4: AP-PARBS -->
+                <rect x="372" y="92" width="28" height="113" fill="#16a34a" />
+                <text x="386" y="84" text-anchor="middle" font-size="11" font-weight="bold" fill="#15803d">+19.4%</text>
+                <rect x="402" y="64" width="28" height="141" fill="#22c55e" />
+                <text x="416" y="56" text-anchor="middle" font-size="11" font-weight="bold" fill="#15803d">+28.6%</text>
+                <text x="401" y="224" text-anchor="middle" font-size="11" font-weight="bold"
+                  fill="#15803d">AP-PARBS</text>
+
+                <!-- Legend -->
+                <rect x="70" y="16" width="12" height="12" fill="#16a34a" /><text x="88" y="26" font-size="10.5"
+                  font-weight="bold" fill="#334155">Weighted Speedup (Throughput)</text>
+                <rect x="265" y="16" width="12" height="12" fill="#22c55e" /><text x="283" y="26" font-size="10.5"
+                  font-weight="bold" fill="#334155">Harmonic Speedup (Fairness Balance)</text>
+              </svg>
+            </div>
+
+            <div class="card-elevated">
+              <div class="card-title">📋 ตารางสรุปตัวชี้วัดประสิทธิภาพและความเป็นธรรม</div>
+              <div class="academic-table-wrap">
+                <table class="academic-table">
+                  <thead>
+                    <tr>
+                      <th>อัลกอริทึม</th>
+                      <th>Weighted Speedup (↑)</th>
+                      <th>Harmonic Speedup (↑)</th>
+                      <th>Max Slowdown (↓)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1. Open-Page + FR-FCFS</td>
+                      <td>1.000 (Baseline)</td>
+                      <td>1.000</td>
+                      <td>2.45× (เหลื่อมล้ำสูง)</td>
+                    </tr>
+                    <tr>
+                      <td>2. PAR-BS (Parallel เดิม)</td>
+                      <td>1.098 (+9.8%)</td>
+                      <td>1.164 (+16.4%)</td>
+                      <td>1.68×</td>
+                    </tr>
+                    <tr>
+                      <td>3. ABP (Adaptive เดิม)</td>
+                      <td>1.074 (+7.4%)</td>
+                      <td>1.062 (+6.2%)</td>
+                      <td>2.28×</td>
+                    </tr>
+                    <tr class="highlight-row">
+                      <td><strong>4. AP-PARBS (ที่นำเสนอ)</strong></td>
+                      <td><strong>1.194 (+19.4%)</strong></td>
+                      <td><strong>1.286 (+28.6%)</strong></td>
+                      <td><strong>1.41× (ดีที่สุด)</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style="margin-top:14px; font-size:0.96rem;">
+                ✅ <strong>ข้อสังเกต:</strong> ผลลัพธ์ของ AP-PARBS (+19.4%) สูงกว่าผลบวกแยกส่วนของ PAR-BS (+9.8%) และ ABP
+                (+7.4%) เพราะอัลกอริทึมทั้งสองช่วยอุดช่องโหว่ของกันและกันโดยตรง
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>ลดค่า Maximum Slowdown จาก 2.45 เท่า เหลือเพียง 1.41 เท่า ช่วยขจัดปัญหา Thread Starvation
+          ได้อย่างมีประสิทธิภาพ</span>
+        <span>Slide 23 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 24: EXPERIMENTAL RESULTS 3 (ENERGY & HARDWARE OVERHEAD)
+         ========================================== -->
+    <section class="slide" data-slide="24" data-title="ผลการทดลองที่ 3: การประหยัดพลังงาน & ต้นทุนฮาร์ดแวร์ 2.4 KB">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 11: EXPERIMENTAL RESULTS (PART 3/3)</span>
+            <h2 class="slide-title">ผลการทดลองที่ 3: การประหยัดพลังงานและต้นทุนวงจรฮาร์ดแวร์ (2.4 KB)</h2>
+          </div>
+          <span class="slide-number-pill">Slide 24 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-2">
+            <div class="card-elevated">
+              <div class="card-title">🔬 ตารางคำนวณพื้นที่จัดเก็บข้อมูลเพิ่มเติมใน Memory Controller</div>
+              <div class="academic-table-wrap">
+                <table class="academic-table">
+                  <thead>
+                    <tr>
+                      <th>โครงสร้างฮาร์ดแวร์ที่เพิ่ม</th>
+                      <th>การคำนวณขนาดบิต</th>
+                      <th>ขนาดรวม</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>1. ตาราง PHT (512 ช่อง)</strong><br /><small>10-bit Tag + 2-bit $\hat{A}$ + 2-bit
+                          Conf</small></td>
+                      <td>$512 \times 14\text{ bits}$</td>
+                      <td><strong>896 Bytes</strong></td>
+                    </tr>
+                    <tr>
+                      <td><strong>2. ตัวติดตามแถวที่เปิดต่อ Bank</strong><br /><small>16 Banks × 26 bits</small></td>
+                      <td>$16 \times 26\text{ bits}$</td>
+                      <td><strong>52 Bytes</strong></td>
+                    </tr>
+                    <tr>
+                      <td><strong>3. บิตสถานะ Batch &amp; BLP Rank</strong><br /><small>1,024 Queue entries × 5
+                          bits</small></td>
+                      <td>$1024 \times 5\text{ bits}$</td>
+                      <td><strong>640 Bytes</strong></td>
+                    </tr>
+                    <tr>
+                      <td><strong>4. วงจรเปรียบเทียบ QAPI</strong></td>
+                      <td>ลอจิก XOR/OR ขนาน</td>
+                      <td><strong>~820 Bytes eq.</strong></td>
+                    </tr>
+                    <tr class="highlight-row">
+                      <td><strong>รวมพื้นที่ SRAM ทั้งหมดต่อ Channel</strong></td>
+                      <td><strong>19,264 bits</strong></td>
+                      <td><strong>~2.4 KB</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:18px;">
+              <div class="card card-success">
+                <div class="card-title">🔋 ลดค่า Energy-Delay Product (EDP) ลงถึง 26.2%</div>
+                <p>การปิดแถวที่ไม่ได้ใช้งานล่วงหน้าทำให้ DRAM Bank เข้าสู่สถานะ Precharge Standby ที่กินไฟต่ำกว่า Active
+                  Standby และลดจำนวนครั้งการเปิดแถวเก้อ ส่งผลให้ประหยัดพลังงานรวมของ DRAM ลงได้ <strong>16.5%</strong>
+                </p>
+              </div>
+
+              <div class="card card-refine">
+                <div class="card-title">⚡ ไม่กระทบความถี่สัญญาณนาฬิกา (Zero Critical-Path Penalty)</div>
+                <p>การค้นตาราง PHT ขนาด 512 ช่อง ใช้เวลาไม่ถึง $0.2\text{ ns}$
+                  และทำงานขนานไปพร้อมกับการตรวจสอบคิวของตัวจัดตารางคำขอ จึงไม่เพิ่มรอบสัญญาณนาฬิกาของ Memory Controller
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>พื้นที่ 2.4 KB คิดเป็นสัดส่วนน้อยกว่า 0.03% ของแคช L3 ขนาด 8 MB บนซีพียูทั่วไป</span>
+        <span>Slide 24 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 25: CONCLUSION & FUTURE WORK
+         ========================================== -->
+    <section class="slide" data-slide="25" data-title="สรุปผลการวิจัยและแนวทางพัฒนาในอนาคต (Conclusion & Future Work)">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 12: CONCLUSION &amp; FUTURE WORK</span>
+            <h2 class="slide-title">สรุปผลการวิจัย คุณูปการสำคัญ และแนวทางการพัฒนาต่อยอดในอนาคต</h2>
+          </div>
+          <span class="slide-number-pill">Slide 25 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="grid-3">
+            <div class="card card-adaptive">
+              <div class="card-title"><span class="step-badge" style="background:var(--accent-adaptive);">1</span>
+                ตอบคำถาม RQ1 &amp; RQ2</div>
+              <p>การพยากรณ์ด้วยจำนวนครั้งการเข้าถึง (Access-Based PHT) ร่วมกับการตรวจสอบคิวล่วงหน้า (QAPI)
+                แก้ปัญหาการสั่งปิดแถวผิดจังหวะของระบบเดิมได้อย่างสมบูรณ์</p>
+            </div>
+
+            <div class="card card-parallel">
+              <div class="card-title"><span class="step-badge" style="background:var(--accent-parallel);">2</span>
+                ตอบคำถาม RQ3</div>
+              <p>การผสานเข้ากับ Parallel Batch Scheduling ช่วยจัดกลุ่มคำขอของเธรดเดียวกันให้เกิด Row Hit ต่อเนื่อง
+                แล้วสั่ง Auto-Precharge ทันทีเมื่อเปลี่ยนผ่านไปยังเธรดถัดไป</p>
+            </div>
+
+            <div class="card card-refine">
+              <div class="card-title"><span class="step-badge" style="background:var(--accent-refine);">3</span>
+                แนวทางต่อยอดในอนาคต</div>
+              <p>สามารถขยายผลสู่หน่วยความจำ <strong>HBM3 (High Bandwidth Memory)</strong> สำหรับชิปประมวลผล AI/LLM
+                ที่มีถึง 32–64 Pseudo-channels รวมถึงระบบ <strong>CXL Memory Pooling</strong></p>
+            </div>
+          </div>
+
+          <div class="card-elevated">
+            <div class="card-title">📌 สรุปภาพรวมการทำ Algorithm Refinement ในโปรเจกต์นี้</div>
+            <p>
+              งานวิจัยนี้ได้พิสูจน์ให้เห็นว่า การนำ <strong>Adaptive Algorithm</strong> (การพยากรณ์โหมดหน้าหน่วยความจำ)
+              และ <strong>Parallel Algorithm</strong> (การจัดตารางคำขอข้ามแบงก์แบบขนาน)
+              มาปรับปรุงและเชื่อมโยงสัญญาณสถานะเข้าด้วยกัน สามารถยกระดับประสิทธิภาพของระบบจัดการ RAM
+              ได้เหนือกว่าการใช้อัลกอริทึมใดอัลกอริทึมหนึ่งเพียงลำพังอย่างชัดเจน
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>สรุปผลการวิจัยครบถ้วนตามวัตถุประสงค์ทั้ง 3 ข้อ</span>
+        <span>Slide 25 / 26</span>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 26: VERIFIABLE REFERENCES & FULL PDF REPORT
+         ========================================== -->
+    <section class="slide" data-slide="26" data-title="เอกสารอ้างอิงที่ตรวจสอบได้ & ดาวน์โหลดรายงานวิจัย PDF">
+      <div>
+        <div class="slide-top-ribbon">
+          <div class="slide-header-left">
+            <span class="slide-section-tag">SECTION 13: VERIFIABLE REFERENCES &amp; FULL REPORT</span>
+            <h2 class="slide-title">เอกสารอ้างอิงมาตรฐาน IEEE พร้อมลิงก์ต้นทาง และไฟล์รายงานวิจัยฉบับเต็ม</h2>
+          </div>
+          <span class="slide-number-pill">Slide 26 / 26</span>
+        </div>
+
+        <div class="slide-body">
+          <div class="card card-adaptive"
+            style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; padding:20px 26px;">
+            <div>
+              <div class="card-title" style="margin-bottom:4px;">📄 เอกสารรายงานวิจัยฉบับสมบูรณ์ (Full Academic Research
+                Report PDF)</div>
+              <p style="font-size:0.96rem;">เรียบเรียงครบทั้ง 5 บทตามรูปแบบรายงานวิจัย (บทนำ, ทฤษฎีและวรรณกรรม,
+                การออกแบบอัลกอริทึม, การสร้างและทดสอบต้นแบบ, สรุปผลและอ้างอิง)</p>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <div style="display:flex; flex-wrap:wrap; gap:12px;">
+                <a href="รายงานวิจัย_AP-PARBS_DRAM_Row_Buffer.pdf" target="_blank" class="ctrl-btn ctrl-btn-pdf"
+                  style="padding:12px 20px; font-size:0.95rem;">📥 เปิด / ดาวน์โหลดไฟล์ PDF</a>
+                <a href="report.html" target="_blank" class="ctrl-btn"
+                  style="background:#0f172a; color:#fff; padding:12px 18px; font-size:0.95rem;">📖
+                  เปิดหน้าเว็บรายงาน</a>
+                <a href="ap_parbs_simulator.py" target="_blank" class="ctrl-btn"
+                  style="background:#0f766e; color:#fff; padding:12px 18px; font-size:0.95rem;">🐍 โค้ด Python
+                  Simulator</a>
+                <a href="prototype_trace_log.csv" target="_blank" class="ctrl-btn"
+                  style="background:#334155; color:#fff; padding:12px 18px; font-size:0.95rem;">📊 Trace Log (CSV)</a>
+                <a href="prototype_test_results.json" target="_blank" class="ctrl-btn"
+                  style="background:#334155; color:#fff; padding:12px 18px; font-size:0.95rem;">📋 ผลทดสอบ (JSON)</a>
+              </div>
+            </div>
+
+            <div class="card-elevated" style="padding:20px 26px;">
+              <div class="card-title">📚 รายการเอกสารอ้างอิงต้นทางที่สามารถคลิกตรวจสอบได้จริง (Verifiable Primary
+                Sources)</div>
+              <ol
+                style="padding-left:24px; display:flex; flex-direction:column; gap:10px; font-size:0.92rem; color:var(--text-secondary);">
+                <li>
+                  <strong>[1] Awasthi et al. (PACT 2011):</strong> "Prediction-Based DRAM Row-Buffer Management in the
+                  Many-Core Era," <em>IEEE PACT</em>, 2011. —
+                  <a class="ref-link" href="https://doi.org/10.1109/PACT.2011.14" target="_blank"
+                    rel="noopener">https://doi.org/10.1109/PACT.2011.14 ↗</a>
+                </li>
+                <li>
+                  <strong>[2] Mutlu &amp; Moscibroda (ISCA 2008):</strong> "Parallelism-Aware Batch Scheduling:
+                  Enhancing both Performance and Fairness of Shared DRAM Systems," <em>ACM/IEEE ISCA</em>, 2008. —
+                  <a class="ref-link" href="https://doi.org/10.1109/ISCA.2008.7" target="_blank" rel="noopener">DOI
+                    ↗</a> |
+                  <a class="ref-link" href="https://people.inf.ethz.ch/omutlu/pub/parbs_isca08.pdf" target="_blank"
+                    rel="noopener">ETH Zürich PDF ↗</a>
+                </li>
+                <li>
+                  <strong>[3] Rixner et al. (ISCA 2000):</strong> "Memory Access Scheduling," <em>ACM/IEEE ISCA</em>,
+                  2000. —
+                  <a class="ref-link" href="https://doi.org/10.1145/339647.339668" target="_blank" rel="noopener">DOI
+                    ↗</a> |
+                  <a class="ref-link" href="https://cva.stanford.edu/publications/2000/isca-mas/mas.pdf" target="_blank"
+                    rel="noopener">Stanford PDF ↗</a>
+                </li>
+                <li>
+                  <strong>[4] Lee, Mutlu et al. (MICRO 2008):</strong> "Prefetch-Aware DRAM Controllers," <em>IEEE/ACM
+                    MICRO</em>, 2008. —
+                  <a class="ref-link" href="https://doi.org/10.1109/MICRO.2008.4771793" target="_blank"
+                    rel="noopener">DOI ↗</a> |
+                  <a class="ref-link" href="https://people.inf.ethz.ch/omutlu/pub/padc_micro08.pdf" target="_blank"
+                    rel="noopener">ETH Zürich PDF ↗</a>
+                </li>
+                <li>
+                  <strong>[5] Kim, Mutlu et al. (MICRO 2010):</strong> "Thread Cluster Memory Scheduling," <em>IEEE/ACM
+                    MICRO</em>, 2010. —
+                  <a class="ref-link" href="https://doi.org/10.1109/MICRO.2010.51" target="_blank" rel="noopener">DOI
+                    ↗</a> |
+                  <a class="ref-link" href="https://people.inf.ethz.ch/omutlu/pub/tcm_micro10.pdf" target="_blank"
+                    rel="noopener">ETH Zürich PDF ↗</a>
+                </li>
+                <li>
+                  <strong>[6] Kim, Yang, Mutlu (IEEE CAL 2016):</strong> "Ramulator: A Fast and Extensible DRAM
+                  Simulator," <em>IEEE CAL</em>, 2016. —
+                  <a class="ref-link" href="https://doi.org/10.1109/LCA.2015.2414456" target="_blank" rel="noopener">DOI
+                    ↗</a> |
+                  <a class="ref-link" href="https://github.com/CMU-SAFARI/ramulator" target="_blank"
+                    rel="noopener">GitHub Source ↗</a>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-footer">
+          <span>จบการนำเสนอทั้ง 26 สไลด์ • ขอบคุณครับ/ค่ะ</span>
+          <span>Slide 26 / 26</span>
+        </div>
+    </section>
+
+  </main>
+
+  <!-- Speaker Notes Drawer -->
+  <aside id="speaker-notes-drawer" class="speaker-notes-drawer" aria-live="polite">
+    <div class="speaker-notes-header">
+      <span id="speaker-notes-title">🎙️ บทพูดสำหรับนำเสนออาจารย์ (Speaker Notes - Slide 01/26)</span>
+      <button id="btn-close-notes" class="ctrl-btn" type="button" style="padding:3px 10px; font-size:0.78rem;">ซ่อน
+        (N)</button>
+    </div>
+    <div id="speaker-notes-content" class="speaker-notes-content"></div>
+  </aside>
+
+  <!-- Bottom Keyboard Shortcut Bar -->
+  <footer class="bottom-nav-dock">
+    <div class="dock-shortcuts">
+      คีย์ลัด:
+      <span>←</span><span>→</span> หรือ <span>Space</span> เปลี่ยนสไลด์
+      <span>G</span> ภาพรวม 26 สไลด์
+      <span>N</span> บทพูดนำเสนอ
+      <span>M</span> โหมดอ่านยาว
+      <span>T</span> ธีมมืด/สว่าง
+    </div>
+    <div id="bottom-status-text">โหมดนำเสนอทีละสไลด์ (26 Slides • Spacious Layout)</div>
+  </footer>
+
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="vendor/katex/auto-render.min.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
